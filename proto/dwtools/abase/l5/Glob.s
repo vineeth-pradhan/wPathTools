@@ -57,7 +57,7 @@ _pathIsGlobRegexpSource += '(?:[?*]+)'; /* asterix, question mark */
 _pathIsGlobRegexpSource += '|(?:([!?*@+]*)\\((.*?(?:\\|(.*?))*)\\))'; /* parentheses */
 _pathIsGlobRegexpSource += '|(?:\\[(.+?)\\])'; /* square brackets */
 _pathIsGlobRegexpSource += '|(?:\\{(.*)\\})'; /* curly brackets */
-_pathIsGlobRegexpSource += '|(?:\0)'; /* zero */
+_pathIsGlobRegexpSource += '\\(\\)|\\0'; /* zero */
 
 let _pathIsGlobRegexp = new RegExp( _pathIsGlobRegexpSource );
 
@@ -127,6 +127,7 @@ let _globSplitToRegexpSource = (function functor()
   [
     [ /\.\./g, '\\.\\.' ], /* dual dot */
     [ /\./g, '\\.' ], /* dot */
+    [ /\(\)|\0/g, '' ], /* empty parentheses or zero */
     [ /([!?*@+]*)\((.*?(?:\|(.*?))*)\)/g, hanleParentheses ], /* parentheses */
     // [ /\/\*\*/g, '(?:\/.*)?', ], /* slash + dual asterix */
     [ /\*\*\*/g, '(?:.*)', ], /* triple asterix */
@@ -185,6 +186,7 @@ let _globSplitToRegexpSource = (function functor()
   function hanleParentheses( src, it )
   {
 
+    debugger;
     let inside = it.groups[ 1 ].split( '|' );
     let multiplicator = it.groups[ 0 ];
 
@@ -451,7 +453,10 @@ function _globAnalogs2( glob, stemPath, basePath )
 
     if( isDotted( stemRelativeGlobDir ) )
     {
+      if( self.begins( stemPath, globDir ) || self.begins( globDir, stemPath ) )
       handleInside();
+      else
+      handleNever();
     }
     else
     {
@@ -467,7 +472,6 @@ function _globAnalogs2( glob, stemPath, basePath )
   function handleInside()
   {
 
-    // let globSplits = self._globAnalogs1( globRelativeGlobDir ).join( self._upStr );
     let globSplits = globRelativeGlobDir
 
     let glob3 = globSplits;
@@ -479,8 +483,9 @@ function _globAnalogs2( glob, stemPath, basePath )
     }
     else
     {
-      if( stemRelativeBase !== self._hereStr )
-      glob3 = stemRelativeBase + self._upStr + glob3;
+      glob3 = self.join( stemRelativeBase, glob3 );
+      // if( stemRelativeBase !== self._hereStr )
+      // glob3 = stemRelativeBase + self._upStr + glob3;
     }
     _.arrayAppendOnce( result, self.dot( glob3 ) );
 
@@ -504,8 +509,6 @@ function _globAnalogs2( glob, stemPath, basePath )
 
     if( handleCertain( globSplits, globRegexpSourceSplits ) )
     return;
-
-    debugger;
 
     let s = 0;
     let firstAny = globSplits.length;
@@ -566,6 +569,12 @@ function _globAnalogs2( glob, stemPath, basePath )
     _.assert( result.length === 0 );
     result.push( '**' );
     return true;
+  }
+
+  /* */
+
+  function handleNever()
+  {
   }
 
   /* */
@@ -861,7 +870,6 @@ function _globRegexpSourceSplitsConcatWithSlashes( globRegexpSourceSplits )
     so them could be missing
   */
 
-  debugger;
   let isPrevTriAsterisk = false;
   for( let s = 0 ; s < globRegexpSourceSplits.length ; s++ )
   {
@@ -869,13 +877,13 @@ function _globRegexpSourceSplitsConcatWithSlashes( globRegexpSourceSplits )
 
     let isTriAsterisk = split === '(?:.*)'; /* *** */
     let isDualAsterisk = split === '.*'; /* ** */
-    let isAsteristk = split === '[^\/]*'; /* * */
+    let isAsterisk = split === '[^\/]*'; /* * */
 
     if( isTriAsterisk )
-    split = '(?:(?:^|/)?' + split + ')?';
+    split = '(?:(?:^|/)' + split + ')?';
     else if( isDualAsterisk )
     split = '(?:(?:^|/)' + split + ')?';
-    else if( isAsteristk )
+    else if( isAsterisk )
     split = '(?:(?:^|/)' + split + ')?';
     else if( s > 0 )
     {
@@ -927,8 +935,15 @@ function _globFullToRegexpSingle( glob, stemPath, basePath, isPositive )
   _.assert( arguments.length === 3 || arguments.length === 4 );
 
   glob = self.join( stemPath, glob );
+  glob = self.globNormalize( glob );
+
+  if( !self.isGlob( glob ) )
+  glob = self.join( glob, '**' );
+
   glob = self._globAnalogs1( glob );
+
   let analogs = self._globAnalogs2( glob, stemPath, basePath );
+
   debugger;
 
   let maybeHere = '';
