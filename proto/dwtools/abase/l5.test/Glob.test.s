@@ -123,7 +123,23 @@ function globSplitToRegexp( test )
 
 //
 
-function relateForGlob( test )
+function _globSplit( test )
+{
+
+  var expected =
+  [
+    [ '**', '*proto*', '**', '*dir2*', '**' ],
+    [ '**', '*proto*dir2*', '**' ],
+  ]
+  var src = '**proto**dir2**';
+  var got = _.path._globSplit( src );
+  test.identical( got, expected );
+
+}
+
+//
+
+function _globAnalogs( test )
 {
 
   test.shouldThrowErrorSync( () =>
@@ -132,7 +148,7 @@ function relateForGlob( test )
     var globPath = 'src1Terminal/file';
     var filePath = '/';
     var basePath = '/src1Terminal';
-    var got = _.path._relateForGlob( globPath, filePath, basePath );
+    var got = _.path._globAnalogs( globPath, filePath, basePath );
     test.identical( got, expected );
   });
 
@@ -142,162 +158,162 @@ function relateForGlob( test )
     var globPath = 'f';
     var filePath = '/a/b/c';
     var basePath = '/a/d/e';
-    var got = _.path._relateForGlob( globPath, filePath, basePath );
+    var got = _.path._globAnalogs( globPath, filePath, basePath );
     test.identical( got, expected );
   });
 
   /* */
 
-  var got = _.path._relateForGlob( '/src1Terminal', '/', '/src1Terminal' )
+  var got = _.path._globAnalogs( '/src1Terminal', '/', '/src1Terminal' )
   var expected = [ '.' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/**/b/**', '/a', '/a/b/c' );
+  var got = _.path._globAnalogs( '/**/b/**', '/a', '/a/b/c' );
   var expected = [ '../**/b/**', '**' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/doubledir/d1/**', '/doubledir/d1', '/doubledir/d1/d11' );
+  var got = _.path._globAnalogs( '/doubledir/d1/**', '/doubledir/d1', '/doubledir/d1/d11' );
   var expected = [ '**' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/doubledir/d1/**', '/doubledir', '/doubledir/d1/d11' );
+  var got = _.path._globAnalogs( '/doubledir/d1/**', '/doubledir', '/doubledir/d1/d11' );
   var expected = [ 'd1/**', '**' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/doubledir/d1/*', '/doubledir', '/doubledir/d1/d11' );
+  var got = _.path._globAnalogs( '/doubledir/d1/*', '/doubledir', '/doubledir/d1/d11' );
   var expected = [ 'd1/*', '**' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/src1/**', '/src2', '/src2' );
+  var got = _.path._globAnalogs( '/src1/**', '/src2', '/src2' );
   var expected = [ '../src1/**' ];
   test.identical( got, expected );
 
-  var got = _.path._relateForGlob( '/src2/**', '/src2', '/src2' );
+  var got = _.path._globAnalogs( '/src2/**', '/src2', '/src2' );
   var expected = [ './**' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/src1/**', '/src2', '/' );
+  var got = _.path._globAnalogs( '/src1/**', '/src2', '/' );
   var expected = [ './src1/**' ];
   test.identical( got, expected );
 
-  var got = _.path._relateForGlob( '/src2/**', '/src2', '/' );
+  var got = _.path._globAnalogs( '/src2/**', '/src2', '/' );
   var expected = [ './src2/**' ];
   test.identical( got, expected );
 
-  var got = _.path._relateForGlob( '/src1/**', '/', '/src2' );
+  var got = _.path._globAnalogs( '/src1/**', '/', '/src2' );
   var expected = [ 'src1/**' ];
   test.identical( got, expected );
 
-  var got = _.path._relateForGlob( '/src2/**', '/', '/src2' );
+  var got = _.path._globAnalogs( '/src2/**', '/', '/src2' );
   var expected = [ './**' ];
   test.identical( got, expected );
 
   /* */
 
-  var got = _.path._relateForGlob( '/src1/**', '/src2', '/src1' );
+  var got = _.path._globAnalogs( '/src1/**', '/src2', '/src1' );
   var expected = [ './**' ];
   test.identical( got, expected );
 
-  var got = _.path._relateForGlob( '/src1/**', '/src1', '/src2' );
+  var got = _.path._globAnalogs( '/src1/**', '/src1', '/src2' );
   var expected = [ '**' ];
   test.identical( got, expected );
 
 }
 
-// function relateForGlob( test )
+// function _globAnalogs( test )
 // {
 //
 //   var expected = [ '../src1Terminal/file', './file' ];
 //   var globPath = 'src1Terminal/file';
 //   var filePath = '/';
 //   var basePath = '/src1Terminal';
-//   var got = _.path._relateForGlob( globPath, filePath, basePath );
+//   var got = _.path._globAnalogs( globPath, filePath, basePath );
 //   test.identical( got, expected );
 //
 //   var expected = [ '../../b/c/f' ];
 //   var globPath = 'f';
 //   var filePath = '/a/b/c';
 //   var basePath = '/a/d/e';
-//   var got = _.path._relateForGlob( globPath, filePath, basePath );
+//   var got = _.path._globAnalogs( globPath, filePath, basePath );
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/src1Terminal', '/', '/src1Terminal' )
+//   var got = _.path._globAnalogs( '/src1Terminal', '/', '/src1Terminal' )
 //   var expected = [ '../src1Terminal', '.' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '**/b/**', '/a', '/a/b/c' );
+//   var got = _.path._globAnalogs( '**/b/**', '/a', '/a/b/c' );
 //   var expected = [ '../../**/b/**', './**/b/**', './**' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/doubledir/d1/**', '/doubledir/d1', '/doubledir/d1/d11' );
+//   var got = _.path._globAnalogs( '/doubledir/d1/**', '/doubledir/d1', '/doubledir/d1/d11' );
 //   var expected = [ '../**', './**' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/doubledir/d1/**', '/doubledir', '/doubledir/d1/d11' );
+//   var got = _.path._globAnalogs( '/doubledir/d1/**', '/doubledir', '/doubledir/d1/d11' );
 //   var expected = [ '../../d1/**', './**' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/doubledir/d1/*', '/doubledir', '/doubledir/d1/d11' );
+//   var got = _.path._globAnalogs( '/doubledir/d1/*', '/doubledir', '/doubledir/d1/d11' );
 //   var expected = [ '../../d1/*', '.' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/src1/**', '/src2', '/src2' );
+//   var got = _.path._globAnalogs( '/src1/**', '/src2', '/src2' );
 //   var expected = [ '../src1/**' ];
 //   test.identical( got, expected );
 //
-//   var got = _.path._relateForGlob( '/src2/**', '/src2', '/src2' );
+//   var got = _.path._globAnalogs( '/src2/**', '/src2', '/src2' );
 //   var expected = [ './**' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/src1/**', '/src2', '/' );
+//   var got = _.path._globAnalogs( '/src1/**', '/src2', '/' );
 //   var expected = [ './src1/**' ];
 //   test.identical( got, expected );
 //
-//   var got = _.path._relateForGlob( '/src2/**', '/src2', '/' );
+//   var got = _.path._globAnalogs( '/src2/**', '/src2', '/' );
 //   var expected = [ './src2/**' ];
 //   test.identical( got, expected );
 //
-//   var got = _.path._relateForGlob( '/src1/**', '/', '/src2' );
+//   var got = _.path._globAnalogs( '/src1/**', '/', '/src2' );
 //   var expected = [ '../src1/**' ];
 //   test.identical( got, expected );
 //
-//   var got = _.path._relateForGlob( '/src2/**', '/', '/src2' );
+//   var got = _.path._globAnalogs( '/src2/**', '/', '/src2' );
 //   var expected = [ '../src2/**', './**' ];
 //   test.identical( got, expected );
 //
 //   /* */
 //
-//   var got = _.path._relateForGlob( '/src1/**', '/src2', '/src1' );
+//   var got = _.path._globAnalogs( '/src1/**', '/src2', '/src1' );
 //   var expected = [ '../src1/**' ];
 //   test.identical( got, expected );
 //
-//   var got = _.path._relateForGlob( '/src1/**', '/src1', '/src2' );
+//   var got = _.path._globAnalogs( '/src1/**', '/src1', '/src2' );
 //   var expected = [ '../src1/**' ];
 //   test.identical( got, expected );
 //
@@ -456,7 +472,9 @@ var Self =
 
     fromGlob,
     globSplitToRegexp,
-    relateForGlob,
+
+    _globSplit,
+    _globAnalogs,
 
     globFilter,
     globFilterVals,
