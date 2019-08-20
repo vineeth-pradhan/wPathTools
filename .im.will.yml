@@ -3,23 +3,23 @@ submodule :
 
   wTools :
     path : npm:///wTools
-    enabled : 0
-  wpathbasic :
+    enabled : 0 # submodule
+  wPathBasic :
     path : npm:///wpathbasic
-    enabled : 0
-  wpathtools :
+    enabled : 0 # submodule
+  wPathTools :
     path : hd://.
-    enabled : 0
+    enabled : 0 # submodule
     criterion :
       development : 1
   wFiles :
     path : npm:///wFiles
-    enabled : 0
+    enabled : 0 # submodule
     criterion :
       development : 1
   wTesting :
     path : npm:///wTesting
-    enabled : 0
+    enabled : 0 # submodule
     criterion :
       development : 1
 
