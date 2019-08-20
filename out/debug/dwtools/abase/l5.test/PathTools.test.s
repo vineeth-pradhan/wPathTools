@@ -4259,7 +4259,8 @@ function filterInplace( test )
   test.case = 'single element map with dst in multiple element array and src';
   var src = { '/src' : [ 'dst1', 'dst2' ] };
   var got = _.path.filterInplace( src, nothing2 );
-  var expected = { '' : [] };
+  // var expected = { '' : [] }; // qqq : why???
+  var expected = { '' : '' };
   test.identical( got, expected );
   test.is( got === src );
 
@@ -4287,7 +4288,7 @@ function filterInplace( test )
   test.case = 'single element map with only dst in multiple element array';
   var src = { '' : [ 'dst1', 'dst2' ] };
   var got = _.path.filterInplace( src, nothing2 );
-  var expected = { '' : [] };
+  var expected = { '' : '' };
   test.identical( got, expected );
   test.is( got === src );
 
@@ -4390,7 +4391,7 @@ function filterInplace( test )
   test.case = 'single element map with dst in multiple element array and src';
   var src = { '/src' : [ 'dst1', 'dst2' ] };
   var got = _.path.filterInplace( src, nothing3 );
-  var expected = { '' : [] };
+  var expected = { '' : '' };
   test.identical( got, expected );
   test.is( got === src );
 
@@ -4418,7 +4419,7 @@ function filterInplace( test )
   test.case = 'single element map with only dst in multiple element array';
   var src = { '' : [ 'dst1', 'dst2' ] };
   var got = _.path.filterInplace( src, nothing3 );
-  var expected = { '' : [] };
+  var expected = { '' : '' };
   test.identical( got, expected );
   test.is( got === src );
 
@@ -4561,7 +4562,7 @@ function filterInplace( test )
 
   test.case = 'nothing2';
   var got = _.path.filterInplace( src, nothing2 );
-  var expected = { '' : [] };
+  var expected = { '' : '' };
   test.identical( got, expected );
   test.is( got === src );
 
@@ -12622,7 +12623,7 @@ function group( test )
   }
   var got = _.path.group( o );
   test.identical( got, expected )
-  
+
   test.case = 'vals has inner arrays';
   var o =
   {
@@ -12635,7 +12636,7 @@ function group( test )
   }
   var got = _.path.group( o );
   test.identical( got, expected )
-  
+
   test.case = 'keys as map';
   var o =
   {
@@ -12651,7 +12652,7 @@ function group( test )
   }
   var got = _.path.group( o );
   test.identical( got, expected )
-  
+
   if( !Config.debug )
   return;
 
@@ -12929,10 +12930,16 @@ var Self =
 
     /* path map */
 
+/*
+qqq : similar test routines ( for example filterPairs and filterPairsInplace )
+      should have exactly the same test cases
+      in the same order
+*/
+
     filterPairs,
     filterPairsInplace,
     filterInplace,
-    filterInplaceExtends,
+    filterInplaceExtends, /* qqq : ? */
     filter,
     filterExtends,
 

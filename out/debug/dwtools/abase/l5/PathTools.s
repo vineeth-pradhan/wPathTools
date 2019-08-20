@@ -500,9 +500,10 @@ function filterInplace( filePath, onEach )
       }
       else
       {
-        _.arrayAppendArraysOnce( filePath, r )
+        _.arrayAppendArraysOnce( filePath, r );
       }
     }
+    /* qqq : should be no simplify in the routine */
     return self.simplifyInplace( filePath );
   }
   else if( _.mapIs( filePath ) )
@@ -563,6 +564,7 @@ function filterInplace( filePath, onEach )
 
     }
 
+    /* qqq : should be no simplify in the routine */
     return self.simplifyInplace( filePath );
   }
   else _.assert( 0 );
@@ -580,20 +582,46 @@ function filterInplace( filePath, onEach )
 
     _.assert( src === undefined || _.strIs( src ) || _.arrayIs( src ) );
 
+    /*
+      qqq : general rule of path element merging should be applied here
+      - only non-empty strings could be in an array
+      - have 3 groups of elements which cant coexist:
+      -- non-empty str
+      -- boolean-like,
+      -- empty ( null or empty string )
+    */
+
     if( dst !== undefined )
     {
       if( _.arrayIs( src ) )
       {
         for( let s = 0 ; s < src.length ; s++ )
         if( src[ s ] !== undefined )
-        pathMap[ src[ s ] ] = _.scalarAppend( pathMap[ src[ s ] ], dst );
+        pathMap[ src[ s ] ] = append( pathMap[ src[ s ] ], dst );
       }
-      else if( src !== undefined )
+      else
       {
-        pathMap[ src ] = _.scalarAppend( pathMap[ src ], dst );
+        if( src !== undefined )
+        pathMap[ src ] = append( pathMap[ src ], dst );
       }
     }
 
+  }
+
+  function append( dst, src )
+  {
+    if( src === '' )
+    dst = src;
+    else if( _.boolLike( src ) )
+    dst = src;
+    else
+    {
+      if( _.strIs( dst ) || _.arrayIs( dst ) )
+      dst = _.scalarAppend( dst, src );
+      else
+      dst = src;
+    }
+    return dst;
   }
 
 }
@@ -1924,7 +1952,7 @@ function group( o )
 
   o.result = o.result || Object.create( null );
   o.result[ '/' ] = o.result[ '/' ] || [];
-  
+
   let vals = _.arrayFlattenOnce( null, o.vals );
   let keys = o.keys;
 
