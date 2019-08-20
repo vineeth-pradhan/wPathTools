@@ -1324,7 +1324,7 @@ function _mapExtend( o )
         if( key !== '' )
         used = true;
         if( o.mode === 'append' )
-        r = _.scalarAppendOnce( dst, src );  // Dmytro : routine scalarAppendOnce does not exists
+        r = _.scalarAppendOnce( dst, src );
         else
         r = _.scalarPrependOnce( dst, src );
       }
@@ -1924,7 +1924,7 @@ function group( o )
 
   o.result = o.result || Object.create( null );
   o.result[ '/' ] = o.result[ '/' ] || [];
-  
+
   let vals = _.arrayFlattenOnce( null, o.vals );
   let keys = o.keys;
 
