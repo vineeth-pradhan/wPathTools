@@ -12913,6 +12913,316 @@ function setOptimize( test )
 
   /* - */
 
+} /* end of mapOptimize */
+
+//
+
+function mapOptimize( test )
+{
+  let path = _.path;
+
+  /* - */
+
+  test.open( 'all levels, relative' );
+
+  test.case = 'direct order';
+  var filePath =
+  {
+    "module1" : `.`,
+    "module1/ami" : `.`,
+    "module1/amid" : `.`,
+    "module1/amid/dir" : `.`,
+    "module1/amid/dir/terminal" : `.`,
+    "module1/amid/dir2" : `.`,
+    "module2" : `.`,
+    "module2/amid" : `.`,
+  }
+  var expected =
+  {
+    'module1' : '.',
+    'module2' : '.',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'revers order';
+  var filePath =
+  {
+    "module2/amid" : `.`,
+    "module2" : `.`,
+    "module1/amid/dir2" : `.`,
+    "module1/amid/dir/terminal" : `.`,
+    "module1/amid/dir" : `.`,
+    "module1/amid" : `.`,
+    "module1/ami" : `.`,
+    "module1" : `.`,
+  }
+  var expected =
+  {
+    'module1' : '.',
+    'module2' : '.',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'no order';
+  var filePath =
+  {
+    "module2/amid" : `.`,
+    "module2" : `.`,
+    "module1/amid" : `.`,
+    "module1/amid/dir2" : `.`,
+    "module1/amid/dir" : `.`,
+    "module1/amid/dir/terminal" : `.`,
+    "module1/ami" : `.`,
+    "module1" : `.`,
+  }
+  var expected =
+  {
+    'module1' : '.',
+    'module2' : '.',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.close( 'all levels, relative' );
+
+  /* - */
+
+  test.open( 'gap in levels, relative' );
+
+  test.case = 'direct order';
+  var filePath =
+  {
+    'a1' : '',
+    'a1/b1/c1' : '',
+    'a1/b1/c2' : '',
+    'a1/b1/c3' : '',
+    'a1/b1/c4/d1/e1/f1' : '',
+    'a2' : '',
+    'a2/b1/c1' : '',
+    'a2/b1/c1/d1/e1/f1' : '',
+    'a2/b1/c2' : '',
+  }
+  var expected =
+  {
+    'a1' : '',
+    'a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'revers order';
+  var filePath =
+  {
+    'a1/b1/c4/d1/e1/f1' : '',
+    'a1/b1/c3' : '',
+    'a1/b1/c2' : '',
+    'a1/b1/c1' : '',
+    'a1' : '',
+    'a2/b1/c2' : '',
+    'a2/b1/c1/d1/e1/f1' : '',
+    'a2/b1/c1' : '',
+    'a2' : '',
+  }
+  var expected =
+  {
+    'a1' : '',
+    'a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'no order, simpler';
+  var filePath =
+  {
+    'a2/b1/c1/d1/e1/f1' : '',
+    'a2' : '',
+    'a2/b1/c1' : '',
+    'a2/b1/c2' : '',
+  }
+  var expected =
+  {
+    'a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'no order';
+  var filePath =
+  {
+    'a1/b1/c3' : '',
+    'a1' : '',
+    'a1/b1/c1' : '',
+    'a1/b1/c2' : '',
+    'a1/b1/c4/d1/e1/f1' : '',
+    'a2/b1/c1/d1/e1/f1' : '',
+    'a2' : '',
+    'a2/b1/c1' : '',
+    'a2/b1/c2' : '',
+  }
+  var expected =
+  {
+    'a1' : '',
+    'a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.close( 'gap in levels, relative' );
+
+  /* - */
+
+  test.open( 'all levels, absolute' );
+
+  test.case = 'direct order';
+  var filePath =
+  {
+    "/module1" : `.`,
+    "/module1/ami" : `.`,
+    "/module1/amid" : `.`,
+    "/module1/amid/dir" : `.`,
+    "/module1/amid/dir/terminal" : `.`,
+    "/module1/amid/dir2" : `.`,
+    "/module2" : `.`,
+    "/module2/amid" : `.`,
+  }
+  var expected =
+  {
+    '/module1' : '.',
+    '/module2' : '.',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'revers order';
+  var filePath =
+  {
+    "/module2/amid" : `.`,
+    "/module2" : `.`,
+    "/module1/amid/dir2" : `.`,
+    "/module1/amid/dir/terminal" : `.`,
+    "/module1/amid/dir" : `.`,
+    "/module1/amid" : `.`,
+    "/module1/ami" : `.`,
+    "/module1" : `.`,
+  }
+  var expected =
+  {
+    '/module1' : '.',
+    '/module2' : '.',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'no order';
+  var filePath =
+  {
+    "/module2/amid" : `.`,
+    "/module2" : `.`,
+    "/module1/amid" : `.`,
+    "/module1/amid/dir2" : `.`,
+    "/module1/amid/dir" : `.`,
+    "/module1/amid/dir/terminal" : `.`,
+    "/module1/ami" : `.`,
+    "/module1" : `.`,
+  }
+  var expected =
+  {
+    '/module1' : '.',
+    '/module2' : '.',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.close( 'all levels, absolute' );
+
+  /* - */
+
+  test.open( 'gap in levels, absolute' );
+
+  test.case = 'direct order';
+  var filePath =
+  {
+    '/a1' : '',
+    '/a1/b1/c1' : '',
+    '/a1/b1/c2' : '',
+    '/a1/b1/c3' : '',
+    '/a1/b1/c4/d1/e1/f1' : '',
+    '/a2' : '',
+    '/a2/b1/c1' : '',
+    '/a2/b1/c1/d1/e1/f1' : '',
+    '/a2/b1/c2' : '',
+  }
+  var expected =
+  {
+    '/a1' : '',
+    '/a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'revers order';
+  var filePath =
+  {
+    '/a2/b1/c2' : '',
+    '/a2/b1/c1/d1/e1/f1' : '',
+    '/a2/b1/c1' : '',
+    '/a2' : '',
+    '/a1/b1/c4/d1/e1/f1' : '',
+    '/a1/b1/c3' : '',
+    '/a1/b1/c2' : '',
+    '/a1/b1/c1' : '',
+    '/a1' : '',
+  }
+  var expected =
+  {
+    '/a1' : '',
+    '/a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'no order, simpler';
+  var filePath =
+  {
+    '/a2/b1/c1/d1/e1/f1' : '',
+    '/a2' : '',
+    '/a2/b1/c1' : '',
+    '/a2/b1/c2' : '',
+  }
+  var expected =
+  {
+    '/a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.case = 'no order';
+  var filePath =
+  {
+    '/a1/b1/c3' : '',
+    '/a1' : '',
+    '/a1/b1/c1' : '',
+    '/a1/b1/c2' : '',
+    '/a1/b1/c4/d1/e1/f1' : '',
+    '/a2/b1/c1/d1/e1/f1' : '',
+    '/a2' : '',
+    '/a2/b1/c1' : '',
+    '/a2/b1/c2' : '',
+  }
+  var expected =
+  {
+    '/a1' : '',
+    '/a2' : '',
+  };
+  var got = path.mapOptimize( filePath );
+  test.identical( got, expected );
+
+  test.close( 'gap in levels, absolute' );
+
+  /* - */
+
 }
 
 // --
@@ -12957,6 +13267,7 @@ qqq : similar test routines ( for example filterPairs and filterPairsInplace )
     mapGroupByDst,
     group,
     setOptimize,
+    mapOptimize,
 
   },
 
