@@ -117,6 +117,19 @@ let _globSplitToRegexpSource = (function functor()
 
   let _globRegexpSourceCache = Object.create( null )
 
+  let _transformation0 =
+  [
+    [ /\[(.+?)\]/g, handlePass ], /* square brackets */
+    [ /\.\./g, handlePass ], /* dual dot */
+    [ /\./g, handlePass ], /* dot */
+    [ /\(\)|\0/g, handlePass ], /* empty parentheses or zero */
+    [ /([!?*@+]*)\((.*?(?:\|(.*?))*)\)/g, handlePass ], /* parentheses */
+    [ /\*\*\*/g, handlePass, ], /* triple asterix */
+    [ /\*\*/g, handlePass, ], /* dual asterix */
+    [ /(\*)/g, handlePass ], /* single asterix */
+    [ /(\?)/g, handlePass ], /* question mark */
+  ]
+
   let _transformation1 =
   [
     [ /\[(.+?)\]/g, handleSquareBrackets ], /* square brackets */
@@ -133,7 +146,7 @@ let _globSplitToRegexpSource = (function functor()
     [ /\*\*\*/g, '(?:.*)', ], /* triple asterix */
     [ /\*\*/g, '.*', ], /* dual asterix */
     [ /(\*)/g, '[^\/]*' ], /* single asterix */
-    [ /(\?)/g, '[^\/]', ], /* question mark */
+    [ /(\?)/g, '[^\/]' ], /* question mark */
   ]
 
   /* */
@@ -152,11 +165,68 @@ let _globSplitToRegexpSource = (function functor()
     if( result )
     return result;
 
-    result = adjustGlobStr( src );
+    result = transform( src );
 
     _globRegexpSourceCache[ src ] = result;
 
     return result;
+  }
+
+  /* */
+
+  function transform( src )
+  {
+    let result = src; debugger;
+
+    result = _.strReplaceAll
+    ({
+      src : result,
+      dictionary : _transformation0,
+      joining : 1,
+      onUnknown : handleUnknown,
+    });
+
+    result = _.strReplaceAll( result, _transformation1 );
+    result = _.strReplaceAll( result, _transformation2 );
+
+    // result = _.strReplaceAll
+    // ({
+    //   src : result,
+    //   dictionary : _transformation1,
+    //   joining : 0,
+    // });
+    //
+    // result = result.map( ( r ) =>
+    // {
+    //   if( _.arrayIs( r ) )
+    //   return r[ 0 ];
+    //   return _.strReplaceAll
+    //   ({
+    //     src : r,
+    //     dictionary : _transformation2,
+    //     joining : 1,
+    //     onUnknown : handleUnknown,
+    //   })
+    // });
+    //
+    // return result.join( '' );
+
+    return result;
+  }
+
+  /* */
+
+  function handleUnknown( src )
+  {
+    debugger;
+    return _.regexpEscape( src );
+  }
+
+  /* */
+
+  function handlePass( src )
+  {
+    return src;
   }
 
   /* */
@@ -178,7 +248,7 @@ let _globSplitToRegexpSource = (function functor()
     inside = inside.replace( /^!/g, '^' );
     if( inside[ 0 ] === '^' )
     inside = inside + '\/';
-    return '[' + inside + ']';
+    return [ '[' + inside + ']' ];
   }
 
   /* */
@@ -186,7 +256,6 @@ let _globSplitToRegexpSource = (function functor()
   function hanleParentheses( src, it )
   {
 
-    debugger;
     let inside = it.groups[ 1 ].split( '|' );
     let multiplicator = it.groups[ 0 ];
 
@@ -206,18 +275,6 @@ let _globSplitToRegexpSource = (function functor()
     result += multiplicator;
 
     /* (?:(?!(?:abc)).)+ */
-
-    return result;
-  }
-
-  /* */
-
-  function adjustGlobStr( src )
-  {
-    let result = src;
-
-    result = _.strReplaceAll( result, _transformation1 );
-    result = _.strReplaceAll( result, _transformation2 );
 
     return result;
   }
@@ -922,6 +979,7 @@ function _globRegexpSourceSplitsJoinForDirectory( globRegexpSourceSplits )
 
 //
 
+let _globFullToRegexpSingleCache = Object.create( null ); /* xxx : try */
 function _globFullToRegexpSingle( glob, stemPath, basePath, isPositive )
 {
   let self = this;
@@ -930,44 +988,39 @@ function _globFullToRegexpSingle( glob, stemPath, basePath, isPositive )
   isPositive = true;
 
   _.assert( _.strIs( glob ), 'Expects string {-glob-}' );
-  _.assert( _.strIs( stemPath ) && !_.path.isGlob( stemPath ) );
-  _.assert( _.strIs( basePath ) && !_.path.isGlob( basePath ) );
+  _.assert( _.strIs( stemPath ) && !self.isGlob( stemPath ) );
+  _.assert( _.strIs( basePath ) && !self.isGlob( basePath ) );
   _.assert( arguments.length === 3 || arguments.length === 4 );
 
   glob = self.join( stemPath, glob );
-  glob = self.globNormalize( glob );
 
-  if( !self.isGlob( glob ) )
-  glob = self.join( glob, '**' );
+  _.assert( self.isGlob( glob ) );
 
-  glob = self._globAnalogs1( glob );
-
-  let analogs = self._globAnalogs2( glob, stemPath, basePath );
-
+  let analogs1 = self._globAnalogs1( glob );
+  let analogs2 = self._globAnalogs2( analogs1, stemPath, basePath );
   debugger;
 
   let maybeHere = '';
   let hereEscapedStr = self._globSplitToRegexpSource( self._hereStr );
   let downEscapedStr = self._globSplitToRegexpSource( self._downStr );
 
-  let cache = Object.create( null );
   let result = Object.create( null );
   result.transient = [];
   result.actual = [];
   result.certainly = [];
 
-  for( let r = 0 ; r < analogs.length ; r++ )
+  for( let r = 0 ; r < analogs2.length ; r++ )
   {
-    let analog = analogs[ r ];
+    let analog = analogs2[ r ];
     let splits = self.split( analog );
 
     let certainlySplits;
     if( splits[ splits.length - 1 ] === '**' || splits[ splits.length - 1 ] === '***' )
     certainlySplits = splits.slice();
 
-    let sources = splits.map( ( e, i ) => toRegexp( e ) );
+    let sources = splits.map( ( e, i ) => toSource( e ) );
     if( certainlySplits )
-    certainlySplits = certainlySplits.map( ( e, i ) => toRegexp( e ) );
+    certainlySplits = certainlySplits.map( ( e, i ) => toSource( e ) );
 
     result.actual.push( self._globRegexpSourceSplitsJoinForTerminal( sources ) );
     result.transient.push( self._globRegexpSourceSplitsJoinForDirectory( sources ) );
@@ -996,12 +1049,13 @@ function _globFullToRegexpSingle( glob, stemPath, basePath, isPositive )
 
   /* - */
 
-  function toRegexp( split )
+  function toSource( split )
   {
-    if( cache[ split ] )
-    return cache[ split ];
-    cache[ split ] = self._globSplitToRegexpSource( split );
-    return cache[ split ];
+    // if( cache[ split ] )
+    // return cache[ split ];
+    // cache[ split ] = self._globSplitToRegexpSource( split );
+    // return cache[ split ];
+    return self._globSplitToRegexpSource( split );
   }
 
 }
@@ -1025,7 +1079,8 @@ function globsFullToRegexps()
 
 function pathMapToRegexps( o )
 {
-  let path = this;
+  let self = this;
+  let regexps = Object.create( null );
 
   if( arguments[ 1 ] !== undefined )
   o = { filePath : arguments[ 0 ], basePath : arguments[ 1 ] }
@@ -1052,165 +1107,76 @@ function pathMapToRegexps( o )
   {
     for( let srcGlob in o.filePath )
     if( _.boolLike( o.filePath[ srcGlob ] ) && o.filePath[ srcGlob ] )
-    o.filePath[ srcGlob ] = null;
+    o.filePath[ srcGlob ] = '';
   }
 
   /* unglob filePath */
 
-  o.fileGlobToPathMap = Object.create( null );
-  o.filePathToGlobMap = Object.create( null );
-  o.unglobedFilePath = Object.create( null );
-  for( let srcGlob in o.filePath )
-  {
-    let dstPath = o.filePath[ srcGlob ];
-
-    if( dstPath === null )
-    dstPath = '';
-
-    _.assert( path.isAbsolute( srcGlob ), () => 'Expects absolute path, but ' + _.strQuote( srcGlob ) + ' is not' );
-
-    let srcPath = path.fromGlob( srcGlob );
-
-    o.fileGlobToPathMap[ srcGlob ] = srcPath;
-    o.filePathToGlobMap[ srcPath ] = o.filePathToGlobMap[ srcPath ] || [];
-    o.filePathToGlobMap[ srcPath ].push( srcGlob );
-    let wasUnglobedFilePath = o.unglobedFilePath[ srcPath ];
-    if( wasUnglobedFilePath === undefined || _.boolLike( wasUnglobedFilePath ) )
-    // if( !_.boolLike( dstPath ) || dstPath || wasUnglobedFilePath === undefined ) // yyy
-    if( !_.boolLike( dstPath ) )
-    {
-      _.assert( wasUnglobedFilePath === undefined || _.boolLike( wasUnglobedFilePath ) || wasUnglobedFilePath === dstPath );
-      o.unglobedFilePath[ srcPath ] = dstPath;
-    }
-
-  }
+  fileUnglob();
+  o.optimizedUnglobedFilePath = _.mapExtend( null, o.unglobedFilePath );
 
   /* unglob basePath */
 
-  o.unglobedBasePath = Object.create( null );
-  for( let fileGlob in o.basePath )
-  {
-    _.assert( path.isAbsolute( fileGlob ) );
-    _.assert( !path.isGlob( o.basePath[ fileGlob ] ) );
-
-    let filePath;
-    let basePath = o.basePath[ fileGlob ];
-    if( o.filePath[ fileGlob ] === undefined )
-    {
-      filePath = fileGlob;
-      fileGlob = o.filePathToGlobMap[ filePath ];
-    }
-
-    if( _.arrayIs( filePath ) )
-    filePath.forEach( ( filePath ) => unglobedBasePathAdd( fileGlob, filePath, basePath ) );
-    else
-    unglobedBasePathAdd( fileGlob, filePath, basePath )
-
-  }
+  o.unglobedBasePath = baseUnglob();
+  o.optimizedUnglobedBasePath = _.mapExtend( null, o.unglobedBasePath );
 
   /* group by path */
 
-  o.redundantMap = _.mapExtend( null, o.filePath );
-  o.groupedMap = Object.create( null );
-  for( let fileGlob in o.redundantMap )
+  o.groupsMap = groupBySrc( 0 );
+  o.optimalGroupsMap = groupBySrc( 1 );
+
+  /* */
+
+  o.optimalRegexpsMap = Object.create( null );
+  for( let stemPath in o.optimalGroupsMap )
   {
+    let r = o.optimalRegexpsMap[ stemPath ] = regexpsMapFor( stemPath, o.optimalGroupsMap[ stemPath ] );
+  }
 
-    let value = o.redundantMap[ fileGlob ];
-    let filePath = o.fileGlobToPathMap[ fileGlob ];
-    let group = { [ fileGlob ] : value };
-
-    if( _.boolLike( value ) )
-    {
-      continue;
-    }
-
-    delete o.redundantMap[ fileGlob ];
-
-    for( let fileGlob2 in o.redundantMap )
-    {
-      let value2 = o.redundantMap[ fileGlob2 ];
-      let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
-      let begin;
-
-      _.assert( fileGlob !== fileGlob2 );
-
-      if( path.begins( filePath, filePath2 ) )
-      begin = filePath2;
-      else if( path.begins( filePath2, filePath ) )
-      begin = filePath;
-
-      /* skip if different group */
-      if( !begin )
-      continue;
-
-      if( _.boolLike( o.redundantMap[ fileGlob2 ] ) )
-      {
-        group[ fileGlob2 ] = value2;
-      }
-      else
-      {
-        if( filePath === filePath2 )
-        {
-          group[ fileGlob2 ] = value2;
-          delete o.redundantMap[ fileGlob2 ];
-        }
-      }
-
-    }
-
-    let commonPath = filePath;
-    for( let fileGlob2 in group )
-    {
-      let value2 = o.filePath[ fileGlob2 ];
-
-      if( _.boolLike( value2 ) )
-      continue;
-
-      let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
-      if( filePath2.length < commonPath.length )
-      commonPath = filePath2;
-
-    }
-
-    _.assert( o.groupedMap[ commonPath ] === undefined );
-    o.groupedMap[ commonPath ] = group;
-
+  o.regexpsMap = Object.create( null );
+  for( let stemPath in o.groupsMap )
+  {
+    let r = o.regexpsMap[ stemPath ] = regexpsMapFor( stemPath, o.groupsMap[ stemPath ] );
   }
 
   /* */
 
-  o.regexpMap = Object.create( null );
-  for( let commonPath in o.groupedMap )
+  return o;
+
+  /* */
+
+  function regexpsMapFor( stemPath, group )
   {
-    let group = o.groupedMap[ commonPath ];
-    let basePath = o.unglobedBasePath[ commonPath ];
-    let r = o.regexpMap[ commonPath ] = Object.create( null );
+
+    let basePath = o.unglobedBasePath[ stemPath ];
+    let r = Object.create( null );
     r.certainlyHash = new Map;
     r.transient = [];
     r.actualAny = [];
+    r.actualAny2 = [];
     r.actualAll = [];
     r.actualNone = [];
 
-    _.assert( _.strDefined( basePath ), 'No base path for', commonPath );
+    _.assert( _.strDefined( basePath ), 'No base path for', stemPath );
 
     for( let fileGlob in group )
     {
       let value = group[ fileGlob ];
 
-      if( !path.isGlob( fileGlob ) )
+      fileGlob = self.globNormalize( fileGlob );
+
+      if( !self.isGlob( fileGlob ) )
       {
-        if( commonPath !== fileGlob || _.boolLike( value ) )
-        fileGlob = path.join( fileGlob, '**' );
+        if( stemPath !== fileGlob || _.boolLike( value ) )
+        fileGlob = self.join( fileGlob, '**' );
         else
         continue;
       }
 
-      _.assert( path.isGlob( fileGlob ) );
-      // if( !path.isGlob( fileGlob ) )
-      // fileGlob = path.join( fileGlob, '**' );
+      _.assert( self.isGlob( fileGlob ) );
 
       let isPositive = ( _.boolLike( value ) && !value ) ? false : true;
-      let regexps = path._globFullToRegexpSingle( fileGlob, commonPath, basePath, isPositive );
+      let regexps = regexpsFor( fileGlob, stemPath, basePath, isPositive );
 
       if( regexps.certainly )
       r.certainlyHash.set( regexps.actual, regexps.certainly )
@@ -1219,10 +1185,12 @@ function pathMapToRegexps( o )
       {
         if( _.boolLike( value ) )
         {
+          // r.actualAny2.push( regexps.actual );
           r.actualAll.push( regexps.actual );
         }
         else
         {
+          // r.actualAll.push( regexps.actual );
           r.actualAny.push( regexps.actual );
         }
         r.transient.push( regexps.transient )
@@ -1234,13 +1202,23 @@ function pathMapToRegexps( o )
 
     }
 
+    return r;
   }
-
-  return o;
 
   /* */
 
-  function unglobedBasePathAdd( fileGlob, filePath, basePath )
+  function regexpsFor( fileGlob, stemPath, basePath, isPositive )
+  {
+    let hash = fileGlob + '\0' + stemPath + '\0' + basePath + '\0' + isPositive;
+    let result = regexps[ hash ];
+    if( !result )
+    result = regexps[ hash ] = self._globFullToRegexpSingle( fileGlob, stemPath, basePath, isPositive );
+    return result;
+  }
+
+  /* */
+
+  function unglobedBasePathAdd( unglobedBasePath, fileGlob, filePath, basePath )
   {
     _.assert( _.strIs( fileGlob ) );
     _.assert( filePath === undefined || _.strIs( filePath ) );
@@ -1251,16 +1229,236 @@ function pathMapToRegexps( o )
     return;
 
     if( !filePath )
-    filePath = path.fromGlob( fileGlob );
+    filePath = self.fromGlob( fileGlob );
 
     _.assert
     (
-      o.unglobedBasePath[ filePath ] === undefined || o.unglobedBasePath[ filePath ] === basePath,
+      unglobedBasePath[ filePath ] === undefined || unglobedBasePath[ filePath ] === basePath,
       () => 'The same file path ' + _.strQuote( filePath ) + ' has several different base paths:' +
-      '\n - ' + _.strQuote( o.unglobedBasePath[ filePath ] ),
+      '\n - ' + _.strQuote( unglobedBasePath[ filePath ] ),
       '\n - ' + _.strQuote( basePath )
     );
-    o.unglobedBasePath[ filePath ] = basePath;
+    unglobedBasePath[ filePath ] = basePath;
+  }
+
+  /* */
+
+  function fileUnglob()
+  {
+    o.fileGlobToPathMap = Object.create( null );
+    o.filePathToGlobMap = Object.create( null );
+    o.unglobedFilePath = Object.create( null );
+    for( let srcGlob in o.filePath )
+    {
+      let dstPath = o.filePath[ srcGlob ];
+
+      if( dstPath === null )
+      dstPath = '';
+
+      _.assert( self.isAbsolute( srcGlob ), () => 'Expects absolute path, but ' + _.strQuote( srcGlob ) + ' is not' );
+
+      let srcPath = self.fromGlob( srcGlob );
+
+      o.fileGlobToPathMap[ srcGlob ] = srcPath;
+      o.filePathToGlobMap[ srcPath ] = o.filePathToGlobMap[ srcPath ] || [];
+      o.filePathToGlobMap[ srcPath ].push( srcGlob );
+      let wasUnglobedFilePath = o.unglobedFilePath[ srcPath ];
+      if( wasUnglobedFilePath === undefined || _.boolLike( wasUnglobedFilePath ) )
+      if( !_.boolLike( dstPath ) )
+      {
+        _.assert( wasUnglobedFilePath === undefined || _.boolLike( wasUnglobedFilePath ) || wasUnglobedFilePath === dstPath );
+        o.unglobedFilePath[ srcPath ] = dstPath;
+      }
+
+    }
+
+    // o.unglobedFilePath = self.mapOptimize( o.unglobedFilePath );
+
+  }
+
+  /* */
+
+  function baseUnglob()
+  {
+
+    let unglobedBasePath = Object.create( null );
+    for( let fileGlob in o.basePath )
+    {
+      _.assert( self.isAbsolute( fileGlob ) );
+      _.assert( !self.isGlob( o.basePath[ fileGlob ] ) );
+
+      let filePath;
+      let basePath = o.basePath[ fileGlob ];
+      if( o.filePath[ fileGlob ] === undefined )
+      {
+        filePath = fileGlob;
+        fileGlob = o.filePathToGlobMap[ filePath ];
+      }
+
+      if( _.arrayIs( filePath ) )
+      filePath.forEach( ( filePath ) => unglobedBasePathAdd( unglobedBasePath, fileGlob, filePath, basePath ) );
+      else
+      unglobedBasePathAdd( unglobedBasePath, fileGlob, filePath, basePath )
+    }
+
+    return unglobedBasePath;
+  }
+
+  /* */
+
+  function groupBySrc( optimal )
+  {
+
+    let groupsMap = Object.create( null );
+    let redundantArray = o.redundantArray = Object.keys( o.filePath );
+    redundantArray.sort();
+
+    /*
+    sorted, so paths with the same base are neighbours now
+    */
+
+    for( let f = 0 ; f < redundantArray.length ; f++ )
+    {
+      let fileGlob = redundantArray[ f ];
+      let value = o.filePath[ fileGlob ];
+      let filePath = o.fileGlobToPathMap[ fileGlob ];
+      let group = { [ fileGlob ] : value };
+
+      if( _.boolLike( value ) )
+      continue;
+
+      redundantArray.splice( f, 1 );
+      f -= 1;
+
+      for( let f2 = f+1 ; f2 < redundantArray.length ; f2++ )
+      {
+        let fileGlob2 = redundantArray[ f2 ];
+        let value2 = o.filePath[ fileGlob2 ];
+        let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
+        let begin;
+
+        // if( optimal )
+        if( _.boolLike( value2 ) )
+        continue;
+
+        _.assert( fileGlob !== fileGlob2 );
+
+        if( self.begins( filePath2, filePath ) )
+        begin = filePath;
+
+        /* skip if different group */
+        if( !begin )
+        break;
+
+        if( _.boolLike( value2 ) )
+        {
+          group[ fileGlob2 ] = value2;
+        }
+        else
+        {
+          if( filePath === filePath2 )
+          {
+            group[ fileGlob2 ] = value2;
+            redundantArray.splice( f2, 1 );
+            f2 -= 1;
+          }
+          else
+          {
+            if( optimal )
+            if( o.basePath[ fileGlob2 ] === o.basePath[ fileGlob ] )
+            {
+              group[ fileGlob2 ] = value2;
+              redundantArray.splice( f2, 1 );
+              f2 -= 1;
+              delete o.optimizedUnglobedFilePath[ filePath2 ];
+              delete o.optimizedUnglobedBasePath[ filePath2 ];
+            }
+          }
+        }
+
+      }
+
+      let commonPath = filePath;
+
+      /* */
+
+      if( optimal )
+      for( let fileGlob2 in group ) // yyy
+      {
+        let value2 = o.filePath[ fileGlob2 ];
+
+        if( _.boolLike( value2 ) )
+        continue;
+
+        let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
+        if( filePath2.length < commonPath.length )
+        {
+          _.assert( 0 );
+          commonPath = filePath2;
+        }
+
+      }
+
+      /* */
+
+      // if( optimal )
+      for( let f2 = f ; f2 >= 0 ; f2-- )
+      {
+        let fileGlob2 = redundantArray[ f2 ];
+        let value2 = o.filePath[ fileGlob2 ];
+        let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
+        let begin;
+
+        if( !_.boolLike( value2 ) )
+        continue;
+
+        _.assert( fileGlob !== fileGlob2 );
+
+        if( self.begins( filePath, filePath2 ) )
+        begin = filePath;
+
+        /* skip if different group */
+        if( !begin )
+        continue;
+
+        group[ fileGlob2 ] = value2;
+        // redundantArray.splice( f2, 1 );
+        // f -= 1;
+      }
+
+      /* */
+
+      // if( optimal )
+      for( let f2 = f+1 ; f2 < redundantArray.length ; f2++ )
+      {
+        let fileGlob2 = redundantArray[ f2 ];
+        let value2 = o.filePath[ fileGlob2 ];
+        let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
+        let begin;
+
+        if( !_.boolLike( value2 ) )
+        continue;
+
+        _.assert( fileGlob !== fileGlob2 );
+
+        if( self.begins( filePath2, filePath ) )
+        begin = filePath;
+
+        /* skip if different group */
+        if( !begin )
+        break;
+
+        group[ fileGlob2 ] = value2;
+        // redundantArray.splice( f2, 1 );
+        // f2 -= 1;
+      }
+
+      _.assert( groupsMap[ commonPath ] === undefined );
+      groupsMap[ commonPath ] = group;
+
+    }
+
+    return groupsMap;
   }
 
 }
@@ -1311,7 +1509,6 @@ let Routines =
   _globRegexpSourceSplitsJoinForTerminal,
   _globRegexpSourceSplitsJoinForDirectory,
   _globFullToRegexpSingle,
-
   _globsFullToRegexps : _vectorize( _globFullToRegexpSingle, 4 ),
 
   globsFullToRegexps,
