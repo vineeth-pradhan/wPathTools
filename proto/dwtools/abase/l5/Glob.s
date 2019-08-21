@@ -117,6 +117,19 @@ let _globSplitToRegexpSource = (function functor()
 
   let _globRegexpSourceCache = Object.create( null )
 
+  let _transformation0 =
+  [
+    [ /\[(.+?)\]/g, handlePass ], /* square brackets */
+    [ /\.\./g, handlePass ], /* dual dot */
+    [ /\./g, handlePass ], /* dot */
+    [ /\(\)|\0/g, handlePass ], /* empty parentheses or zero */
+    [ /([!?*@+]*)\((.*?(?:\|(.*?))*)\)/g, handlePass ], /* parentheses */
+    [ /\*\*\*/g, handlePass, ], /* triple asterix */
+    [ /\*\*/g, handlePass, ], /* dual asterix */
+    [ /(\*)/g, handlePass ], /* single asterix */
+    [ /(\?)/g, handlePass ], /* question mark */
+  ]
+
   let _transformation1 =
   [
     [ /\[(.+?)\]/g, handleSquareBrackets ], /* square brackets */
@@ -133,7 +146,7 @@ let _globSplitToRegexpSource = (function functor()
     [ /\*\*\*/g, '(?:.*)', ], /* triple asterix */
     [ /\*\*/g, '.*', ], /* dual asterix */
     [ /(\*)/g, '[^\/]*' ], /* single asterix */
-    [ /(\?)/g, '[^\/]', ], /* question mark */
+    [ /(\?)/g, '[^\/]' ], /* question mark */
   ]
 
   /* */
@@ -152,11 +165,68 @@ let _globSplitToRegexpSource = (function functor()
     if( result )
     return result;
 
-    result = adjustGlobStr( src );
+    result = transform( src );
 
     _globRegexpSourceCache[ src ] = result;
 
     return result;
+  }
+
+  /* */
+
+  function transform( src )
+  {
+    let result = src; debugger;
+
+    result = _.strReplaceAll
+    ({
+      src : result,
+      dictionary : _transformation0,
+      joining : 1,
+      onUnknown : handleUnknown,
+    });
+
+    result = _.strReplaceAll( result, _transformation1 );
+    result = _.strReplaceAll( result, _transformation2 );
+
+    // result = _.strReplaceAll
+    // ({
+    //   src : result,
+    //   dictionary : _transformation1,
+    //   joining : 0,
+    // });
+    //
+    // result = result.map( ( r ) =>
+    // {
+    //   if( _.arrayIs( r ) )
+    //   return r[ 0 ];
+    //   return _.strReplaceAll
+    //   ({
+    //     src : r,
+    //     dictionary : _transformation2,
+    //     joining : 1,
+    //     onUnknown : handleUnknown,
+    //   })
+    // });
+    //
+    // return result.join( '' );
+
+    return result;
+  }
+
+  /* */
+
+  function handleUnknown( src )
+  {
+    debugger;
+    return _.regexpEscape( src );
+  }
+
+  /* */
+
+  function handlePass( src )
+  {
+    return src;
   }
 
   /* */
@@ -178,7 +248,7 @@ let _globSplitToRegexpSource = (function functor()
     inside = inside.replace( /^!/g, '^' );
     if( inside[ 0 ] === '^' )
     inside = inside + '\/';
-    return '[' + inside + ']';
+    return [ '[' + inside + ']' ];
   }
 
   /* */
@@ -205,18 +275,6 @@ let _globSplitToRegexpSource = (function functor()
     result += multiplicator;
 
     /* (?:(?!(?:abc)).)+ */
-
-    return result;
-  }
-
-  /* */
-
-  function adjustGlobStr( src )
-  {
-    let result = src;
-
-    result = _.strReplaceAll( result, _transformation1 );
-    result = _.strReplaceAll( result, _transformation2 );
 
     return result;
   }
@@ -940,6 +998,7 @@ function _globFullToRegexpSingle( glob, stemPath, basePath, isPositive )
 
   let analogs1 = self._globAnalogs1( glob );
   let analogs2 = self._globAnalogs2( analogs1, stemPath, basePath );
+  debugger;
 
   let maybeHere = '';
   let hereEscapedStr = self._globSplitToRegexpSource( self._hereStr );
