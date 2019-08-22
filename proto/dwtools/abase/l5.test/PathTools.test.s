@@ -25,6 +25,108 @@ var o =
 
 function filterPairs( test )
 {
+  test.open( 'instance' );
+
+  var constructor = function ( val )
+  {
+    this.value = val;
+    return this;
+  }
+  var obj = new constructor;
+
+  test.case = 'double';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, double );
+  var expected =
+  {
+    '/path/path' : '[object Object][object Object]',
+    '/path' : { 'value' : undefined }
+  };
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'srcOnly1';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, srcOnly1 );
+  var expected = '/path';
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'srcOnly2';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, srcOnly2 );
+  var expected = { '/path' : { 'value' : undefined } };
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'srcOnly3';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, srcOnly3 );
+  var expected = { '/path' : { 'value' : undefined } };
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  var src = { '/path' : [ obj, obj ] };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, srcOnly3 );
+  var expected = { '/path' : { 'value' : undefined } };
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'dstOnly';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, dstOnly );
+  var expected = { '' : { 'value' : undefined } };
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'dstDouble';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, dstDouble );
+  var expected = { '' : { 'value' : undefined } };
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'nothing1';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, nothing1 );
+  var expected = '';
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'nothing2';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, nothing2 );
+  var expected = '';
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'nothing3';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, nothing3 );
+  var expected = '';
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.case = 'nothing4';
+  var src = { '/path' : obj };
+  var src2 = _.entityShallowClone( src );
+  var got = _.path.filterPairs( src, nothing4 );
+  var expected = '';
+  test.identical( src, src2 );
+  test.identical( got, expected );
+
+  test.close( 'instance' );
+
   /* - */
 
   test.open( 'double' );
@@ -1724,8 +1826,7 @@ function filterPairs( test )
 
   /*
     qqq : use all callbacks in the test routine
-    Dmytro : all callbacks used
-            need to add instances in routine and tests
+    Dmytro : all callbacks is used
   */
 
   function duplicates2( it )
@@ -1849,8 +1950,11 @@ function filterPairsInplace( test )
   test.case = 'double';
   var src = { '/path' : obj };
   var got = _.path.filterPairsInplace( src, double );
-  var expected = { '/path/path' : '[object Object][object Object]',
-                   '/path' : { 'value' : undefined } };
+  var expected =
+  {
+    '/path/path' : '[object Object][object Object]',
+    '/path' : { 'value' : undefined }
+  };
   test.identical( got, expected );
   test.is( got === src );
 
