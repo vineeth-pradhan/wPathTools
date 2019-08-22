@@ -1542,6 +1542,22 @@ function mapAppend( dstPathMap, srcPathMap, dstPath )
 
 //
 
+function mapPrepend( dstPathMap, srcPathMap, dstPath )
+{
+  let self = this;
+  _.assert( arguments.length === 2 || arguments.length === 3 );
+  return self._mapExtend
+  ({
+    dstPathMap,
+    srcPathMap,
+    dstPath,
+    mode : 'prepend',
+    supplementing : 1,
+  });
+}
+
+//
+
 function mapsPair( dstFilePath, srcFilePath )
 {
   let self = this;
@@ -2238,6 +2254,7 @@ let Routines =
   mapExtend,
   mapSupplement,
   mapAppend,
+  mapPrepend,
   mapsPair,
 
   simplify,
