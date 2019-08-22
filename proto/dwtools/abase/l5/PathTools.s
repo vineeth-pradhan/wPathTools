@@ -1372,7 +1372,7 @@ function _mapExtend( o )
       }
       else if( src === null || src === '' || _.boolLike( src ) || _.boolLike( dst ) )
       {
-        if( o.supplementing )
+        if( o.supplementing && ( src === null || src === '' || _.boolLike( src ) ) )
         {
           r = dst;
         }
@@ -1383,6 +1383,18 @@ function _mapExtend( o )
           used = true;
         }
       }
+      // {
+      //   if( o.supplementing )
+      //   {
+      //     r = dst;
+      //   }
+      //   else
+      //   {
+      //     r = src;
+      //     if( key !== '' )
+      //     used = true;
+      //   }
+      // }
       else
       {
         if( key !== '' )
