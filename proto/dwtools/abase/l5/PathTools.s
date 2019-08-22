@@ -487,8 +487,6 @@ function filterInplace( filePath, onEach )
     return r;
     else if( _.arrayIs( r ) )
     r = write( it, r );
-    else if( _.mapIs( r ) )
-    r = write( it, _.mapKeys( r ) );
 
     if( r.length === 0 )
     return '';

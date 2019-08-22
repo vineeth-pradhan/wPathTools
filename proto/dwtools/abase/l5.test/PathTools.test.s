@@ -3539,13 +3539,6 @@ function filterPairsInplace( test )
 
 function filterInplace( test )
 {
-  test.case = 'single element map with dst in single empty array and src';
-  var src = { '/src' : [] };
-  var got = _.path.filterInplace( src, ( e, it ) => e );
-  var expected = { '/src' : '' };
-  test.identical( got, expected );
-  test.is( got === src );
-
   test.open( 'callback returns array' );
 
   test.case = 'null';
@@ -4575,6 +4568,26 @@ function filterInplace( test )
 
   /* - */
 
+  if( Config.debug )
+  {
+    test.case = 'without arguments';
+    test.shouldThrowErrorSync( () => _.path.filterInplace() );
+
+    test.case = 'one argument';
+    test.shouldThrowErrorSync( () => _.path.filterInplace( '/path' ) );
+
+    test.case = 'extra arguments';
+    test.shouldThrowErrorSync( () => _.path.filterInplace( '/a/b', drop, 'abs' ) );
+
+    test.case = 'wrong type of filePath';
+    test.shouldThrowErrorSync( () => _.path.filterInplace( 1, double ) );
+
+    test.case = 'wrong type of onEach';
+    test.shouldThrowErrorSync( () => _.path.filterInplace( '/path', '/path' ) );
+  }
+
+  /* callbacks */
+
   function double( filePath )
   {
     if( filePath === null )
@@ -4624,24 +4637,6 @@ function filterInplace( test )
     if( filePath === null )
     _.assert( 0 );
     return null;
-  }
-
-  if( Config.debug )
-  {
-    test.case = 'without arguments';
-    test.shouldThrowErrorSync( () => _.path.filterInplace() );
-
-    test.case = 'one argument';
-    test.shouldThrowErrorSync( () => _.path.filterInplace( '/path' ) );
-
-    test.case = 'extra arguments';
-    test.shouldThrowErrorSync( () => _.path.filterInplace( '/a/b', drop, 'abs' ) );
-
-    test.case = 'wrong type of filePath';
-    test.shouldThrowErrorSync( () => _.path.filterInplace( 1, double ) );
-
-    test.case = 'wrong type of onEach';
-    test.shouldThrowErrorSync( () => _.path.filterInplace( '/path', '/path' ) );
   }
 
 }
