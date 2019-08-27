@@ -176,7 +176,7 @@ let _globSplitToRegexpSource = (function functor()
 
   function transform( src )
   {
-    let result = src; debugger;
+    let result = src;
 
     result = _.strReplaceAll
     ({
@@ -218,7 +218,6 @@ let _globSplitToRegexpSource = (function functor()
 
   function handleUnknown( src )
   {
-    debugger;
     return _.regexpEscape( src );
   }
 
@@ -425,7 +424,7 @@ function _globAnalogs1( glob )
 
       split[ e ] = element;
     }
-    _.arrayCutin( splits, [ s, s+1 ], split );
+    _.longButInplace( splits, [ s, s+1 ], split );
   }
 
   /* concat */
@@ -454,7 +453,7 @@ function _globAnalogs1( glob )
   //   if( split !== '**' || result[ s+1 ] !== '**' )
   //   continue;
   //   debugger;
-  //   _.arrayCutin( result, [ s, s+1 ], split );
+  //   longBut( result, [ s, s+1 ], split );
   // }
 
   /* */
