@@ -2226,6 +2226,58 @@ function setOptimize( filePath )
 
 }
 
+//
+
+function mapOptimize( filePath, basePath )
+{
+  let self = this;
+
+  _.assert( arguments.length === 1 || arguments.length === 2 );
+  _.assert( basePath === undefined || _.mapIs( basePath ) );
+  _.assert( self.isElement( filePath ) );
+
+  if( !_.mapIs( filePath ) )
+  filePath = self.mapExtend( null, filePath );
+
+  let arrayPath = [];
+
+  for( let src in filePath )
+  {
+    let dst = filePath[ src ];
+    if( !_.boolLike( dst ) )
+    arrayPath.push( src );
+  }
+
+  arrayPath.sort();
+
+  // for( let i1 = arrayPath.length-1 ; i1 >= 0 ; i1-- )
+  for( let i1 = 0 ; i1 < arrayPath.length ; i1++ )
+  {
+    let path1 = arrayPath[ i1 ];
+    // for( let i2 = i1-1 ; i2 >= 0 ; i2-- )
+    for( let i2 = i1+1 ; i2 < arrayPath.length ; i2++ )
+    {
+      let path2 = arrayPath[ i2 ];
+
+      if( !self.begins( path2, path1 ) )
+      break;
+
+      if( filePath[ path1 ] !== filePath[ path2 ] )
+      continue;
+
+      if( basePath )
+      if( basePath[ path1 ] !== basePath[ path2 ] )
+      continue;
+
+      arrayPath.splice( i2, 1 );
+      delete filePath[ path2 ];
+      i2 -= 1;
+    }
+  }
+
+  return filePath;
+}
+
 // --
 // fields
 // --
@@ -2256,11 +2308,10 @@ let Routines =
   mapExtend,
   mapSupplement,
   mapAppend,
-  mapPrepend,
   mapsPair,
 
   simplify,
-  simplifyDst,
+  simplifyDst, /* qqq : cover simplifyDst */
   simplifyInplace,
 
   mapDstFromSrc,
@@ -2271,10 +2322,11 @@ let Routines =
   // etc
 
   // areBasePathsEquivalent,
-  trackToRoot, /* qqq : add basic test coverage */
+  traceToRoot, /* qqq : add basic test coverage */
   group,
   mapGroupByDst,
   setOptimize,
+  mapOptimize, /* qqq : cover please */
 
 }
 
