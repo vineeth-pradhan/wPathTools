@@ -1974,7 +1974,7 @@ function mapSrcFromDst( pathMap )
 
 //
 
-function trackToRoot( filePath )
+function traceToRoot( filePath )
 {
   let self = this;
   let result = [];
@@ -2173,7 +2173,7 @@ function setOptimize( filePath )
     }
     else
     {
-      let topPaths = self.trackToRoot( src );
+      let topPaths = self.traceToRoot( src );
       if( !isVisited( topPaths, src ) )
       visit( topPaths, src );
     }
