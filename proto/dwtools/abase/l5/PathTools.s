@@ -467,7 +467,6 @@ function filterPairsInplace( filePath, onEach )
 
 function filterInplace( filePath, onEach )
 {
-  let self = this;
   let it = Object.create( null );
 
   _.assert( arguments.length === 2 );
@@ -476,13 +475,26 @@ function filterInplace( filePath, onEach )
 
   if( filePath === null || _.strIs( filePath ) )
   {
+
     if( filePath === null )
     filePath = '';
     it.value = filePath;
     let r = onEach( it.value, it );
-    if( r === undefined )
+
+    if( r === undefined || r === null )
     return '';
-    return self.simplify( r );
+    else if( _.strIs( r ) )
+    return r;
+    else if( _.arrayIs( r ) )
+    r = write( it, r );
+
+    if( r.length === 0 )
+    return '';
+    if( r.length === 1 )
+    return r[ 0 ];
+    else
+    return r;
+    // return self.simplify( r );
   }
   else if( _.arrayIs( filePath ) )
   {
@@ -494,17 +506,16 @@ function filterInplace( filePath, onEach )
       it.value = filePath2[ p ];
       if( filePath2[ p ] === null )
       it.value = '';
+
       let r = onEach( it.value, it );
       if( r === undefined )
-      {
-      }
-      else
-      {
-        _.arrayAppendArraysOnce( filePath, r );
-      }
+      continue;
+
+      _.arrayAppendArraysOnce( filePath, r );
     }
     /* qqq : should be no simplify in the routine */
-    return self.simplifyInplace( filePath );
+    // return self.simplifyInplace( filePath );
+    return write( it, filePath );
   }
   else if( _.mapIs( filePath ) )
   {
@@ -565,9 +576,17 @@ function filterInplace( filePath, onEach )
     }
 
     /* qqq : should be no simplify in the routine */
-    return self.simplifyInplace( filePath );
+    //return self.simplifyInplace( filePath );
   }
   else _.assert( 0 );
+
+  if( _.mapIs( filePath ) )
+  {
+    if( filePath[ '' ] === '' )
+    delete filePath[ '' ];
+  }
+
+  return filePath;
 
   /* */
 
@@ -579,6 +598,8 @@ function filterInplace( filePath, onEach )
     dst = '';
     if( _.arrayIs( dst ) && dst.length === 1 )
     dst = dst[ 0 ];
+    if( _.boolLike( dst ) )
+    dst = !!dst;
 
     _.assert( src === undefined || _.strIs( src ) || _.arrayIs( src ) );
 
@@ -605,6 +626,21 @@ function filterInplace( filePath, onEach )
         pathMap[ src ] = append( pathMap[ src ], dst );
       }
     }
+    else if( _.arrayIs( src ) )
+    {
+      let src2 = src.slice();
+      src.splice( 0, src.length );
+      for( let i = 0 ; i < src2.length ; i++ )
+      {
+        if( src2[ i ] === null || src2[ i ] === '' || src2[ i ] === undefined || _.boolLike( src2[ i ] ) )
+        continue;
+        else
+        {
+          _.arrayAppendOnce( src, src2[ i ] );
+        }
+      }
+      return src;
+    }
 
   }
 
@@ -617,7 +653,7 @@ function filterInplace( filePath, onEach )
     else
     {
       if( _.strIs( dst ) || _.arrayIs( dst ) )
-      dst = _.scalarAppend( dst, src );
+      dst = _.scalarAppendOnce( dst, src );
       else
       dst = src;
     }
@@ -1338,7 +1374,7 @@ function _mapExtend( o )
       }
       else if( src === null || src === '' || _.boolLike( src ) || _.boolLike( dst ) )
       {
-        if( o.supplementing )
+        if( o.supplementing && ( src === null || src === '' || _.boolLike( src ) ) )
         {
           r = dst;
         }
@@ -1349,12 +1385,24 @@ function _mapExtend( o )
           used = true;
         }
       }
+      // {
+      //   if( o.supplementing )
+      //   {
+      //     r = dst;
+      //   }
+      //   else
+      //   {
+      //     r = src;
+      //     if( key !== '' )
+      //     used = true;
+      //   }
+      // }
       else
       {
         if( key !== '' )
         used = true;
         if( o.mode === 'append' )
-        r = _.scalarAppendOnce( dst, src );  // Dmytro : routine scalarAppendOnce does not exists. qqq : implement and cover, please
+        r = _.scalarAppendOnce( dst, src );
         else
         r = _.scalarPrependOnce( dst, src );
       }
@@ -1490,6 +1538,22 @@ function mapAppend( dstPathMap, srcPathMap, dstPath )
     srcPathMap,
     dstPath,
     mode : 'append',
+    supplementing : 1,
+  });
+}
+
+//
+
+function mapPrepend( dstPathMap, srcPathMap, dstPath )
+{
+  let self = this;
+  _.assert( arguments.length === 2 || arguments.length === 3 );
+  return self._mapExtend
+  ({
+    dstPathMap,
+    srcPathMap,
+    dstPath,
+    mode : 'prepend',
     supplementing : 1,
   });
 }
@@ -2244,6 +2308,7 @@ let Routines =
   mapExtend,
   mapSupplement,
   mapAppend,
+  mapPrepend,
   mapsPair,
 
   simplify,
