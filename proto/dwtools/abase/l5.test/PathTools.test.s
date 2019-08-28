@@ -7364,6 +7364,11 @@ function filterExtends( test )
 
 //
 
+/*
+qqq : sync test cases
+qqq : add single-argument test cases
+*/
+
 function mapExtend( test )
 {
   let path = _.path;
@@ -7376,9 +7381,9 @@ function mapExtend( test )
   let obj1 = new constr( 1 );
   let obj2 = new constr( 2 );
 
-  /* xxx */
+  /* extra */
 
-  test.case = 'temp';
+  test.case = 'dst is map, src is null, dstPath is str';
   var expected = { '/src' : '/dst' };
   var dstMap = { '/src' : '/dst' };
   var srcMap = null;
@@ -7386,12 +7391,24 @@ function mapExtend( test )
   var got = path.mapExtend( dstMap, srcMap, dstPath );
   test.identical( got, expected );
 
-  test.case = 'temp';
+  test.case = 'dst is map with empty str in src, src is map with empty str in src, dstPath is str';
   var expected = { '/src' : '/dst', '' : '/dst3' };
   var dstMap = { '/src' : '/dst' };
   var srcMap = { '' : '/dst3' };
   var dstPath = '/dst2';
   var got = path.mapExtend( dstMap, srcMap, dstPath );
+  test.identical( got, expected );
+
+  test.case = 'single string';
+  var expected = { '/src' : '' };
+  var dstMap = '/src';
+  var got = path.mapExtend( dstMap );
+  test.identical( got, expected );
+
+  test.case = 'single string';
+  var expected = { '/src' : '' };
+  var dstMap = { '/src' : null };
+  var got = path.mapExtend( dstMap );
   test.identical( got, expected );
 
   /* - */

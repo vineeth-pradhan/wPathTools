@@ -141,7 +141,7 @@ let _globSplitToRegexpSource = (function functor()
     [ /\.\./g, '\\.\\.' ], /* dual dot */
     [ /\./g, '\\.' ], /* dot */
     [ /\(\)|\0/g, '' ], /* empty parentheses or zero */
-    [ /([!?*@+]*)\((.*?(?:\|(.*?))*)\)/g, hanleParentheses ], /* parentheses */
+    [ /([!?*@+]?)\((.*?(?:\|(.*?))*)\)/g, hanleParentheses ], /* parentheses */
     // [ /\/\*\*/g, '(?:\/.*)?', ], /* slash + dual asterix */
     [ /\*\*\*/g, '(?:.*)', ], /* triple asterix */
     [ /\*\*/g, '.*', ], /* dual asterix */
@@ -156,7 +156,7 @@ let _globSplitToRegexpSource = (function functor()
 
     _.assert( _.strIs( src ) );
     _.assert( arguments.length === 1, 'Expects single argument' );
-    _.assert( !_.strHas( src, this._downStr ) || src === this._downStr, 'glob should not has splits with ".." combined with something' );
+    _.assert( !_.strHas( src, /(^|\/)\.\.(\/|$)/ ) || src === this._downStr, 'glob should not has splits with ".." combined with something' );
 
     let result;
 
@@ -176,7 +176,7 @@ let _globSplitToRegexpSource = (function functor()
 
   function transform( src )
   {
-    let result = src; debugger;
+    let result = src;
 
     result = _.strReplaceAll
     ({
@@ -189,28 +189,6 @@ let _globSplitToRegexpSource = (function functor()
     result = _.strReplaceAll( result, _transformation1 );
     result = _.strReplaceAll( result, _transformation2 );
 
-    // result = _.strReplaceAll
-    // ({
-    //   src : result,
-    //   dictionary : _transformation1,
-    //   joining : 0,
-    // });
-    //
-    // result = result.map( ( r ) =>
-    // {
-    //   if( _.arrayIs( r ) )
-    //   return r[ 0 ];
-    //   return _.strReplaceAll
-    //   ({
-    //     src : r,
-    //     dictionary : _transformation2,
-    //     joining : 1,
-    //     onUnknown : handleUnknown,
-    //   })
-    // });
-    //
-    // return result.join( '' );
-
     return result;
   }
 
@@ -218,7 +196,6 @@ let _globSplitToRegexpSource = (function functor()
 
   function handleUnknown( src )
   {
-    debugger;
     return _.regexpEscape( src );
   }
 
@@ -265,6 +242,9 @@ let _globSplitToRegexpSource = (function functor()
 
     _.assert( _.strCount( multiplicator, '!' ) === 0 || multiplicator === '!' );
     _.assert( _.strCount( multiplicator, '@' ) === 0 || multiplicator === '@' );
+
+    // inside = inside.map( ( i ) => _.regexpEscape( i ) );
+    inside = inside.map( ( i ) => _globSplitToRegexpSource( i ) );
 
     let result = '(?:' + inside.join( '|' ) + ')';
     if( multiplicator === '@' )
@@ -425,7 +405,7 @@ function _globAnalogs1( glob )
 
       split[ e ] = element;
     }
-    _.arrayCutin( splits, [ s, s+1 ], split );
+    _.longButInplace( splits, [ s, s+1 ], split );
   }
 
   /* concat */
@@ -454,7 +434,7 @@ function _globAnalogs1( glob )
   //   if( split !== '**' || result[ s+1 ] !== '**' )
   //   continue;
   //   debugger;
-  //   _.arrayCutin( result, [ s, s+1 ], split );
+  //   longBut( result, [ s, s+1 ], split );
   // }
 
   /* */
@@ -998,7 +978,7 @@ function _globFullToRegexpSingle( glob, stemPath, basePath, isPositive )
 
   let analogs1 = self._globAnalogs1( glob );
   let analogs2 = self._globAnalogs2( analogs1, stemPath, basePath );
-  debugger;
+  // debugger;
 
   let maybeHere = '';
   let hereEscapedStr = self._globSplitToRegexpSource( self._hereStr );

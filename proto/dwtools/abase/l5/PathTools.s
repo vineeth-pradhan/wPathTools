@@ -1093,7 +1093,8 @@ function isEmpty( src )
 //
 
 /*
-qqq : add support of hashes for mapExtend, extend tests
+qqq kos : extend tests for routine mapExtend
+qqq kos : cover single argument cases for routine mapExtend
 */
 
 function _mapExtend( o )
@@ -1106,8 +1107,8 @@ function _mapExtend( o )
   _.assert( !_.mapIs( o.dstPath ) );
   _.assert( _.arrayHas( [ 'replace', 'append', 'prepend' ], o.mode ) );
 
-  let removing = o.srcPathMap === '' || o.srcPathMap === null;
-  removing = false; /* off the feature */
+  // let removing = o.srcPathMap === '' || o.srcPathMap === null;
+  // removing = false; /* off the feature */
 
   o.dstPath = dstPathNormalize( o.dstPath );
   o.srcPathMap = srcPathMapNormalize( o.srcPathMap );
@@ -1125,9 +1126,10 @@ function _mapExtend( o )
 
   [ o.dstPathMap, used ] = dstPathMapNormalize( o.dstPathMap );
 
-  if( removing )
-  dstPathMapRemove( o.dstPathMap, o.dstPath );
-  else if( o.srcPathMap !== '' )
+  // if( removing )
+  // dstPathMapRemove( o.dstPathMap, o.dstPath );
+  // else
+  if( o.srcPathMap !== '' )
   used = dstPathMapExtend( o.dstPathMap, o.srcPathMap, o.dstPath ) || used;
 
   if( used && o.dstPathMap[ '' ] === o.dstPath )
@@ -1492,7 +1494,7 @@ var expected = { '/dir' : '/file' }
 function mapExtend( dstPathMap, srcPathMap, dstPath )
 {
   let self = this;
-  _.assert( arguments.length === 2 || arguments.length === 3 );
+  _.assertInRange( arguments, [ 1, 4 ] );
   return self._mapExtend
   ({
     dstPathMap,
@@ -1513,7 +1515,7 @@ Dmytro : covered. Test cases is identical to mapExtend.
 function mapSupplement( dstPathMap, srcPathMap, dstPath )
 {
   let self = this;
-  _.assert( arguments.length === 2 || arguments.length === 3 );
+  _.assertInRange( arguments, [ 1, 4 ] );
   return self._mapExtend
   ({
     dstPathMap,
@@ -1529,7 +1531,7 @@ function mapSupplement( dstPathMap, srcPathMap, dstPath )
 function mapAppend( dstPathMap, srcPathMap, dstPath )
 {
   let self = this;
-  _.assert( arguments.length === 2 || arguments.length === 3 );
+  _.assertInRange( arguments, [ 1, 4 ] );
   return self._mapExtend
   ({
     dstPathMap,
