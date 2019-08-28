@@ -2308,6 +2308,7 @@ let Routines =
   mapExtend,
   mapSupplement,
   mapAppend,
+  mapPrepend,
   mapsPair,
 
   simplify,
