@@ -428,7 +428,7 @@ function globFilter( test )
 
   // ? & *
 
-  test.case = 'right glob len=2 not identical to left glob len=3';
+  test.case = 'right glob len = atleast 2 chars';
   var expected = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
   var src = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
   var got = path.globFilter( src, 'a?*' );
