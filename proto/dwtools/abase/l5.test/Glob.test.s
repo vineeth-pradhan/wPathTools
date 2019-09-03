@@ -309,6 +309,7 @@ function globFilter( test )
 {
   let path = _.path;
 
+  // *
   test.case = 'empty right glob';
   test.description = 'empty selector';
   var expected = [];
@@ -358,7 +359,7 @@ function globFilter( test )
   var got = path.globFilter( src, 'd*' );
   test.identical( got, expected );
 
-  test.case = 'empy left glob';
+  test.case = 'empty left glob';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, '*a' );
@@ -404,6 +405,33 @@ function globFilter( test )
   var expected = [ 'dbb', 'dbba' ];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
   var got = path.globFilter( src, '*bb*' );
+  test.identical( got, expected );
+
+  // ?
+  test.case = 'glob match exact 1 char with string len=3';
+  var expected = [ 'dbb', 'dab' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
+  var got = path.globFilter( src, 'd?b' );
+  test.identical( got, expected );
+
+  test.case = 'glob match exact 1 char with string len=2';
+  var expected = [ 'ab', 'ad', 'ac' ];
+  var src = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
+  var got = path.globFilter( src, 'a?' );
+  test.identical( got, expected );
+
+  test.case = 'right glob len=2 not identical to left glob len=3';
+  var expected = [ 'abc', 'adb', 'acb' ];
+  var src = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
+  var got = path.globFilter( src, 'a?' );
+  test.notIdentical( got, expected );
+
+  // ? & *
+
+  test.case = 'right glob len=2 not identical to left glob len=3';
+  var expected = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
+  var src = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
+  var got = path.globFilter( src, 'a?*' );
   test.identical( got, expected );
 
 }
