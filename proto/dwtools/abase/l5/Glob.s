@@ -1252,8 +1252,6 @@ function pathMapToRegexps( o )
 
     }
 
-    // o.unglobedFilePath = self.mapOptimize( o.unglobedFilePath );
-
   }
 
   /* */
@@ -1317,7 +1315,6 @@ function pathMapToRegexps( o )
         let filePath2 = o.fileGlobToPathMap[ fileGlob2 ];
         let begin;
 
-        // if( optimal )
         if( _.boolLike( value2 ) )
         continue;
 
@@ -1363,7 +1360,7 @@ function pathMapToRegexps( o )
       /* */
 
       if( optimal )
-      for( let fileGlob2 in group ) // yyy
+      for( let fileGlob2 in group )
       {
         let value2 = o.filePath[ fileGlob2 ];
 
@@ -1381,7 +1378,6 @@ function pathMapToRegexps( o )
 
       /* */
 
-      // if( optimal )
       for( let f2 = f ; f2 >= 0 ; f2-- )
       {
         let fileGlob2 = redundantArray[ f2 ];
@@ -1402,13 +1398,10 @@ function pathMapToRegexps( o )
         continue;
 
         group[ fileGlob2 ] = value2;
-        // redundantArray.splice( f2, 1 );
-        // f -= 1;
       }
 
       /* */
 
-      // if( optimal )
       for( let f2 = f+1 ; f2 < redundantArray.length ; f2++ )
       {
         let fileGlob2 = redundantArray[ f2 ];
@@ -1429,8 +1422,6 @@ function pathMapToRegexps( o )
         break;
 
         group[ fileGlob2 ] = value2;
-        // redundantArray.splice( f2, 1 );
-        // f2 -= 1;
       }
 
       _.assert( groupsMap[ commonPath ] === undefined );

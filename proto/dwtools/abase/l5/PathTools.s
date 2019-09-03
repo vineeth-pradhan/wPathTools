@@ -2250,11 +2250,9 @@ function mapOptimize( filePath, basePath )
 
   arrayPath.sort();
 
-  // for( let i1 = arrayPath.length-1 ; i1 >= 0 ; i1-- )
   for( let i1 = 0 ; i1 < arrayPath.length ; i1++ )
   {
     let path1 = arrayPath[ i1 ];
-    // for( let i2 = i1-1 ; i2 >= 0 ; i2-- )
     for( let i2 = i1+1 ; i2 < arrayPath.length ; i2++ )
     {
       let path2 = arrayPath[ i2 ];
@@ -2266,8 +2264,12 @@ function mapOptimize( filePath, basePath )
       continue;
 
       if( basePath )
-      if( basePath[ path1 ] !== basePath[ path2 ] )
-      continue;
+      {
+        if( basePath[ path1 ] !== basePath[ path2 ] )
+        continue;
+        else
+        delete basePath[ path2 ];
+      }
 
       arrayPath.splice( i2, 1 );
       delete filePath[ path2 ];
@@ -2326,7 +2328,7 @@ let Routines =
   traceToRoot, /* qqq : add basic test coverage */
   group,
   mapGroupByDst,
-  setOptimize,
+  setOptimize, /* xxx : deprecate maybe? */
   mapOptimize, /* qqq : cover please */
 
 }
