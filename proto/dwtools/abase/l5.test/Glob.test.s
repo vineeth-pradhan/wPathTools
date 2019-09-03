@@ -338,7 +338,7 @@ function globFilter( test )
   var got = path.globFilter( src, '*az' );
   test.identical( got, expected );
 
-  test.case = 'empt right glob';
+  test.case = 'empty right glob';
   test.description = 'selector starts with unexpected char within the league';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
@@ -377,34 +377,22 @@ function globFilter( test )
   var got = path.globFilter( src, '*a*' );
   test.identical( got, expected );
 
+  test.case = 'mid glob double';
+  var expected = [ 'dbb', 'dbba' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
+  var got = path.globFilter( src, '*bb*' );
+  test.identical( got, expected );
+
   test.case = 'not glob';
   var expected = [ 'abd' ];
   var src = [ 'abc', 'abd', 'adb' ];
   var got = path.globFilter( src, 'abd' );
   test.identical( got, expected );
 
-  test.case = 'repeat glob';
-  var expected = [ 'dbb' ];
-  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
-  var got = path.globFilter( src, '*bb' );
-  test.identical( got, expected );
-
   test.case = 'any glob';
   var expected = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, '*' );
-  test.identical( got, expected );
-
-  test.case = 'right glob double b';
-  var expected = [ 'dbb' ];
-  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
-  var got = path.globFilter( src, '*bb' );
-  test.identical( got, expected );
-
-  test.case = 'right glob double middle b';
-  var expected = [ 'dbb', 'dbba' ];
-  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
-  var got = path.globFilter( src, '*bb*' );
   test.identical( got, expected );
 
   // ?
@@ -427,11 +415,43 @@ function globFilter( test )
   test.notIdentical( got, expected );
 
   // ? & *
-
   test.case = 'right glob len = atleast 2 chars';
   var expected = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
   var src = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
   var got = path.globFilter( src, 'a?*' );
+  test.identical( got, expected );
+
+  // [...]
+  // test.case = 'glob range';
+  // var expected = [ 'abcdefg' ];
+  // var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg' ];
+  // var got = path.globFilter( src, '[a..g]' );
+  // test.identical( got, expected );
+
+  // |
+
+  test.case = 'pattern match = none';
+  var expected = [ ];
+  var src = [ 'a', 'b', 'bb' ];
+  var got = path.globFilter( src, 'a(b|bb|bc)' );
+  test.identical( got, expected );
+
+  test.case = 'pattern match = all ending with c';
+  var expected = [ 'abcc' ];
+  var src = [ 'abcc', 'bc', 'ac' ];
+  var got = path.globFilter( src, '(ab|bb|abc)c' );
+  test.identical( got, expected );
+
+  test.case = 'pattern match = none';
+  var expected = [ ];
+  var src = [ 'a', 'b', 'bb' ];
+  var got = path.globFilter( src, 'a(b|bb|bc)' );
+  test.identical( got, expected );
+
+  test.case = 'either a or b but ending with c';
+  var expected = [ 'ac' ];
+  var src = [ 'ac', 'abc', 'cc' ];
+  var got = path.globFilter( src, '(a|b)c' );
   test.identical( got, expected );
 
 }
