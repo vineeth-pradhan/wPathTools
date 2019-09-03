@@ -442,16 +442,36 @@ function globFilter( test )
   var got = path.globFilter( src, '(ab|bb|abc)c' );
   test.identical( got, expected );
 
-  test.case = 'pattern match = none';
-  var expected = [ ];
-  var src = [ 'a', 'b', 'bb' ];
-  var got = path.globFilter( src, 'a(b|bb|bc)' );
-  test.identical( got, expected );
-
-  test.case = 'either a or b but ending with c';
+  test.case = '2 chars starting with a or b but ending with c';
   var expected = [ 'ac' ];
   var src = [ 'ac', 'abc', 'cc' ];
   var got = path.globFilter( src, '(a|b)c' );
+  test.identical( got, expected );
+
+  // !(|)
+
+  test.case = 'not pattern match = none';
+  var expected = [ ];
+  var src = [ 'ab', 'ac' ];
+  var got = path.globFilter( src, 'a!(b|c)' );
+  test.identical( got, expected );
+
+  test.case = '3 chars starting with a, skip b-k, end with z';
+  var expected = [ 'azz' ];
+  var src = [ 'abz', 'acz', 'azz' ];
+  var got = path.globFilter( src, 'a!(b|c|d|e|f|g|h|i|j|k)z' );
+  test.identical( got, expected );
+
+  test.case = 'any 3 chars, no z in the middle';
+  var expected = [ 'abz', 'acz' ];
+  var src = [ 'abz', 'acz', 'zzz' ];
+  var got = path.globFilter( src, 'a!(z)z' );
+  test.identical( got, expected );
+
+  test.case = 'not pattern match = skip all from a to k';
+  var expected = [ 'abz', 'acz' ];
+  var src = [ 'abz', 'acz', 'azz' ];
+  var got = path.globFilter( src, 'a!(z)z' );
   test.identical( got, expected );
 
 }
