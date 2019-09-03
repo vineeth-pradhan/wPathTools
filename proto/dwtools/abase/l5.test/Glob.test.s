@@ -309,10 +309,40 @@ function globFilter( test )
 {
   let path = _.path;
 
+  test.case = 'empty right glob';
+  var expected = [];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, '' );
+  test.identical( got, expected );
+
+  test.case = 'empty right glob';
+  var expected = [];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, 'z*' );
+  test.identical( got, expected );
+
+  test.case = 'empty right glob';
+  var expected = [];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, 'za*' );
+  test.identical( got, expected );
+
+  test.case = 'empty right glob';
+  var expected = [];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, '*az' );
+  test.identical( got, expected );
+
   test.case = 'empt right glob';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'b*' );
+  test.identical( got, expected );
+
+  test.case = 'empty right glob';
+  var expected = [];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, 'dbba' );
   test.identical( got, expected );
 
   test.case = 'right glob';
@@ -343,6 +373,30 @@ function globFilter( test )
   var expected = [ 'abd' ];
   var src = [ 'abc', 'abd', 'adb' ];
   var got = path.globFilter( src, 'abd' );
+  test.identical( got, expected );
+
+  test.case = 'repeat glob';
+  var expected = [ 'dbb' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, '*bb' );
+  test.identical( got, expected );
+
+  test.case = 'any glob';
+  var expected = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, '*' );
+  test.identical( got, expected );
+
+  test.case = 'right glob double b';
+  var expected = [ 'dbb' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
+  var got = path.globFilter( src, '*bb' );
+  test.identical( got, expected );
+
+  test.case = 'right glob double middle b';
+  var expected = [ 'dbb', 'dbba' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab', 'dbba' ];
+  var got = path.globFilter( src, '*bb*' );
   test.identical( got, expected );
 
 }
