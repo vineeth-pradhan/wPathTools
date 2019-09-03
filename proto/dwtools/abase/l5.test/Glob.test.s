@@ -310,42 +310,49 @@ function globFilter( test )
   let path = _.path;
 
   test.case = 'empty right glob';
+  test.description = 'empty selector';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, '' );
   test.identical( got, expected );
 
   test.case = 'empty right glob';
+  test.description = 'selector out of league';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'z*' );
   test.identical( got, expected );
 
   test.case = 'empty right glob';
+  test.description = 'selector starts with double out of league chars';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'za*' );
   test.identical( got, expected );
 
   test.case = 'empty right glob';
+  test.description = 'selector ends with double out of league chars';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, '*az' );
   test.identical( got, expected );
 
   test.case = 'empt right glob';
+  test.description = 'selector starts with unexpected char within the league';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'b*' );
   test.identical( got, expected );
 
   test.case = 'empty right glob';
+  test.description = 'selector string length overflow';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'dbba' );
   test.identical( got, expected );
 
   test.case = 'right glob';
+  test.description = 'selector string starts with d';
   var expected = [ 'dbb', 'dab' ];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'd*' );
