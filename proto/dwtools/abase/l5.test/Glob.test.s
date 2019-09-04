@@ -538,11 +538,11 @@ function globFilter( test )
   // FIXME: Everything below this line
   test.case = 'must throw errors';
   var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool', 'ca' ];
-  test.shouldThrowError(path.globFilter());
-  test.shouldThrowError(path.globFilter( src ));
-  test.shouldThrowError(path.globFilter( src, null ));
-  test.shouldThrowError(path.globFilter( null, 'lorem' ));
-  test.shouldThrowError(path.globFilter( null, null ));
+  test.shouldThrowErrorSync(path.globFilter());
+  test.shouldThrowErrorSync(path.globFilter( src ));
+  test.shouldThrowErrorSync(path.globFilter( src, null ));
+  test.shouldThrowErrorSync(path.globFilter( null, 'lorem' ));
+  test.shouldThrowErrorSync(path.globFilter( null, null ));
 
   test.case = 'plain number';
   var expected = [ 0 ];
