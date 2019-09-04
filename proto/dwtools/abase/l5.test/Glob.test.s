@@ -408,12 +408,6 @@ function globFilter( test )
   var got = path.globFilter( src, 'a?' );
   test.identical( got, expected );
 
-  test.case = 'right glob len=2 not identical to left glob len=3';
-  var expected = [ 'abc', 'adb', 'acb' ];
-  var src = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
-  var got = path.globFilter( src, 'a?' );
-  test.notIdentical( got, expected );
-
   // ? & *
   test.case = 'right glob len = atleast 2 chars';
   var expected = [ 'ab', 'ad', 'ac', 'abc', 'adb', 'acb' ];
@@ -448,6 +442,18 @@ function globFilter( test )
   var got = path.globFilter( src, '(a|b)c' );
   test.identical( got, expected );
 
+  test.case = 'pattern with single group';
+  var expected = [ 'axyzz' ];
+  var src = [ 'axyzz', 'adefz', 'azyxz' ];
+  var got = path.globFilter( src, 'a+(xyz)z' );
+  test.identical( got, expected );
+
+  test.case = 'pattern with 2 groups';
+  var expected = [ 'axyzz', 'adefz' ];
+  var src = [ 'abz', 'acz', 'zzz', 'axyzz', 'adefz' ];
+  var got = path.globFilter( src, 'a+(xyz|def)z' );
+  test.identical( got, expected );
+
   // !(|)
 
   test.case = 'not pattern match = none';
@@ -468,10 +474,16 @@ function globFilter( test )
   var got = path.globFilter( src, 'a!(z)z' );
   test.identical( got, expected );
 
-  test.case = 'not pattern match = skip all from a to k';
+  test.case = 'any 3 chars, no z in the middle';
   var expected = [ 'abz', 'acz' ];
-  var src = [ 'abz', 'acz', 'azz' ];
-  var got = path.globFilter( src, 'a!(z)z' );
+  var src = [ 'abz', 'acz', 'zzz' ];
+  var got = path.globFilter( src, 'a!(xyz)z' );
+  test.identical( got, expected );
+
+  test.case = 'skip a group of chars';
+  var expected = [ 'car', 'cat', 'carpool' ];
+  var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool' ];
+  var got = path.globFilter( src, 'ca!(trophic|nage)' );
   test.identical( got, expected );
 
 }
