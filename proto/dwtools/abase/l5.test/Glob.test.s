@@ -416,7 +416,7 @@ function globFilter( test )
   test.identical( got, expected );
 
   // (...)
-  test.case = 'empty char glob for group of digits';
+  test.case = 'empty char glob for a group of digits';
   var expected = [ ];
   var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890];
   var got = path.globFilter( src, '+([a-g])' );
@@ -453,7 +453,7 @@ function globFilter( test )
   var got = path.globFilter( src, '(ab|bb|abc)c' );
   test.identical( got, expected );
 
-  test.case = '2 chars starting with a or b but ending with c';
+  test.case = '2 chars starting with either a or b but ending with c';
   var expected = [ 'ac' ];
   var src = [ 'ac', 'abc', 'cc' ];
   var got = path.globFilter( src, '(a|b)c' );
@@ -516,18 +516,39 @@ function globFilter( test )
   var got = path.globFilter( src, 'a!(z)z' );
   test.identical( got, expected );
 
-  test.case = 'any 3 chars, no z in the middle';
+  test.case = 'any 3 chars, no xyz in the middle';
   var expected = [ 'abz', 'acz' ];
   var src = [ 'abz', 'acz', 'zzz' ];
   var got = path.globFilter( src, 'a!(xyz)z' );
   test.identical( got, expected );
 
   test.case = 'skip a group of chars';
-  var expected = [ 'car', 'cat', 'carpool' ];
-  var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool' ];
+  var expected = [ 'car', 'cat', 'carpool', 'ca' ];
+  var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool', 'ca' ];
   var got = path.globFilter( src, 'ca!(tastrophic|rnage)' );
   test.identical( got, expected );
 
+  // @
+  test.case = 'match exactly one of the patterns';
+  var expected = [ 'catastrophic', 'carnage' ];
+  var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool', 'ca' ];
+  var got = path.globFilter( src, 'ca@(tastrophic|rnage)' );
+  test.identical( got, expected );
+
+  // FIXME: Everything below this line
+  test.case = 'must throw errors';
+  var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool', 'ca' ];
+  test.shouldThrowError(path.globFilter());
+  test.shouldThrowError(path.globFilter( src ));
+  test.shouldThrowError(path.globFilter( src, null ));
+  test.shouldThrowError(path.globFilter( null, 'lorem' ));
+  test.shouldThrowError(path.globFilter( null, null ));
+
+  test.case = 'plain number';
+  var expected = [ 0 ];
+  var src = [ 0, 1, 2, 3, 4 ];
+  var got = path.globFilter( src, 0 );
+  test.identical( got, expected );
 }
 
 //
