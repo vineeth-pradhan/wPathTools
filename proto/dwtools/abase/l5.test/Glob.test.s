@@ -415,7 +415,7 @@ function globFilter( test )
   var got = path.globFilter( src, 'a?*' );
   test.identical( got, expected );
 
-  // Range 
+  // (...)
   test.case = 'empty char glob for group of digits';
   var expected = [ ];
   var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890];
@@ -440,18 +440,6 @@ function globFilter( test )
   var got = path.globFilter( src, '+([a-g])*([a-z])' );
   test.identical( got, expected );
 
-  test.case = 'empty digit glob for group of unexpected chars';
-  var expected = [ ];
-  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
-  var got = path.globFilter( src, '+([0-9])' );
-  test.identical( got, expected );
-
-  test.case = 'digit glob for group of digits';
-  var expected = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890 ];
-  var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890, 'a', 'abc' ];
-  var got = path.globFilter( src, '+([0-9])' );
-  test.identical( got, expected );
-
   // |
   test.case = 'pattern match = none';
   var expected = [ ];
@@ -471,6 +459,7 @@ function globFilter( test )
   var got = path.globFilter( src, '(a|b)c' );
   test.identical( got, expected );
 
+  // +(|)
   test.case = 'pattern with single group';
   var expected = [ 'axyzz' ];
   var src = [ 'axyzz', 'adefz', 'azyxz' ];
@@ -483,8 +472,32 @@ function globFilter( test )
   var got = path.globFilter( src, 'a+(xyz|def)z' );
   test.identical( got, expected );
 
-  // !(|)
+  test.case = 'empty digit glob for group of unexpected chars';
+  var expected = [ ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
+  var got = path.globFilter( src, '+([0-9])' );
+  test.identical( got, expected );
 
+  test.case = 'digit glob for group of digits';
+  var expected = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890 ];
+  var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890, 'a', 'abc' ];
+  var got = path.globFilter( src, '+([0-9])' );
+  test.identical( got, expected );
+ 
+  // *(|)
+  test.case = 'empty digit glob for group of unexpected chars';
+  var expected = [ ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
+  var got = path.globFilter( src, '*([0-9])' );
+  test.identical( got, expected );
+
+  test.case = 'all strings that owns a car';
+  var expected = [ 'car', 'cart', 'carting', 'cariter' ];
+  var src = [ 'car', 'cart', 'carting', 'cariter' ];
+  var got = path.globFilter( src, 'car*(t|ting|iter)' );
+  test.identical( got, expected );
+
+  // !(|)
   test.case = 'not pattern match = none';
   var expected = [ ];
   var src = [ 'ab', 'ac' ];
