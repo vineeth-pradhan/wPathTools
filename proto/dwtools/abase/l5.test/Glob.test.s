@@ -544,11 +544,9 @@ function globFilter( test )
   test.shouldThrowErrorSync(path.globFilter( null, 'lorem' ));
   test.shouldThrowErrorSync(path.globFilter( null, null ));
 
-  test.case = 'plain number';
-  var expected = [ 0 ];
+  test.case = 'plain numbers as glob must fail';
   var src = [ 0, 1, 2, 3, 4 ];
-  var got = path.globFilter( src, 0 );
-  test.identical( got, expected );
+  test.shouldThrowErrorSync( path.globFilter( src, 0 ) );
 }
 
 //
