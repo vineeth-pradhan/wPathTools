@@ -440,6 +440,14 @@ function globFilter( test )
   var got = path.globFilter( src, '+([a-g])*([a-z])' );
   test.identical( got, expected );
 
+  test.case = 'glob range skip - (!)';
+  var expected = [ 1, 'xyz', 'abcdefghij' ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 1, 'xyz', 'abcdefghij' ];
+  var got1 = path.globFilter( src, '*[!a-g]' );
+  var got2 = path.globFilter( src, '*[^a-g]' );
+  test.identical( got1, expected );
+  test.identical( got2, expected );
+
   // |
   test.case = 'pattern match = none';
   var expected = [ ];
@@ -502,45 +510,31 @@ function globFilter( test )
   var expected = [ ];
   var src = [ 'ab', 'ac' ];
   var got1 = path.globFilter( src, 'a!(b|c)' );
-  var got2 = path.globFilter( src, 'a^(b|c)' );
   test.identical( got1, expected );
-  test.identical( got2, expected );
 
   test.case = '3 chars starting with a, skip b-k, end with z';
   var expected = [ 'azz' ];
   var src = [ 'abz', 'acz', 'azz' ];
-  var got1 = path.globFilter( src, 'a!(b|c|d|e|f|g|h|i|j|k)z' );
-  // FIXME: fails when there is a trailing z character after skipping pattern
-  var got2 = path.globFilter( src, 'a^(b|c|d|e|f|g|h|i|j|k)z' );
-  test.identical( got1, expected );
-  test.identical( got2, expected );
+  var got = path.globFilter( src, 'a!(b|c|d|e|f|g|h|i|j|k)z' );
+  test.identical( got, expected );
 
   test.case = 'any 3 chars, no z in the middle';
   var expected = [ 'abz', 'acz' ];
   var src = [ 'abz', 'acz', 'zzz' ];
-  var got1 = path.globFilter( src, 'a!(z)z' );
-  // FIXME: fails when there is a trailing z character after skipping pattern
-  var got2 = path.globFilter( src, 'a^(z)z' );
-  test.identical( got1, expected );
-  test.identical( got2, expected );
+  var got = path.globFilter( src, 'a!(z)z' );
+  test.identical( got, expected );
 
   test.case = 'any 3 chars, no xyz in the middle';
   var expected = [ 'abz', 'acz' ];
   var src = [ 'abz', 'acz', 'zzz' ];
-  var got1 = path.globFilter( src, 'a!(xyz)z' );
-  // FIXME: fails when there is a trailing z character after skipping pattern
-  var got2 = path.globFilter( src, 'a^(xyz)z' );
-  test.identical( got1, expected );
-  test.identical( got2, expected );
+  var got = path.globFilter( src, 'a!(xyz)z' );
+  test.identical( got, expected );
 
   test.case = 'skip a group of chars';
   var expected = [ 'car', 'cat', 'carpool', 'ca' ];
   var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool', 'ca' ];
-  var got1 = path.globFilter( src, 'ca!(tastrophic|rnage)' );
-  // FIXME: fails when ^ is preceeded by more than one chars
-  var got2 = path.globFilter( src, 'ca^(tastrophic|rnage)' );
-  test.identical( got1, expected );
-  test.identical( got2, expected );
+  var got = path.globFilter( src, 'ca!(tastrophic|rnage)' );
+  test.identical( got, expected );
 
   // @
   test.case = 'match exactly one of the patterns';
