@@ -415,15 +415,32 @@ function globFilter( test )
   var got = path.globFilter( src, 'a?*' );
   test.identical( got, expected );
 
-  // For ranges [,] works and not [...]
-  test.case = 'glob range';
-  var expected = [ 'abcdefg' ];
-  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', '' ];
-  var got = path.globFilter( src, '*[a,g]' );
+  // Range 
+  test.case = 'empty glob for group of digits';
+  var expected = [ ];
+  var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890];
+  var got = path.globFilter( src, '+([a-g])' );
+  test.identical( got, expected );
+
+  test.case = 'glob range group of chars';
+  var expected = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 1 ];
+  var got = path.globFilter( src, '+([a-g])' );
+  test.identical( got, expected );
+
+  test.case = 'empty glob for group of digits';
+  var expected = [ ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
+  var got = path.globFilter( src, '+([0-9])' );
+  test.identical( got, expected );
+
+  test.case = 'glob for group of digits';
+  var expected = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890 ];
+  var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890, 'a', 'abc' ];
+  var got = path.globFilter( src, '+([0-9])' );
   test.identical( got, expected );
 
   // |
-
   test.case = 'pattern match = none';
   var expected = [ ];
   var src = [ 'a', 'b', 'bb' ];
@@ -483,7 +500,7 @@ function globFilter( test )
   test.case = 'skip a group of chars';
   var expected = [ 'car', 'cat', 'carpool' ];
   var src = [ 'car', 'cat', 'catastrophic', 'carnage', 'carpool' ];
-  var got = path.globFilter( src, 'ca!(trophic|nage)' );
+  var got = path.globFilter( src, 'ca!(tastrophic|rnage)' );
   test.identical( got, expected );
 
 }
