@@ -415,12 +415,12 @@ function globFilter( test )
   var got = path.globFilter( src, 'a?*' );
   test.identical( got, expected );
 
-  // [...]
-  // test.case = 'glob range';
-  // var expected = [ 'abcdefg' ];
-  // var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg' ];
-  // var got = path.globFilter( src, '[a..g]' );
-  // test.identical( got, expected );
+  // For ranges [,] works and not [...]
+  test.case = 'glob range';
+  var expected = [ 'abcdefg' ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', '' ];
+  var got = path.globFilter( src, '*[a,g]' );
+  test.identical( got, expected );
 
   // |
 
