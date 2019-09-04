@@ -416,7 +416,7 @@ function globFilter( test )
   test.identical( got, expected );
 
   // Range 
-  test.case = 'empty glob for group of digits';
+  test.case = 'empty char glob for group of digits';
   var expected = [ ];
   var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890];
   var got = path.globFilter( src, '+([a-g])' );
@@ -424,17 +424,29 @@ function globFilter( test )
 
   test.case = 'glob range group of chars';
   var expected = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
-  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 1 ];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 1, 'xyz', 'abcdefghij' ];
   var got = path.globFilter( src, '+([a-g])' );
   test.identical( got, expected );
 
-  test.case = 'empty glob for group of digits';
+  test.case = 'glob range group of chars and must have more trailing';
+  var expected = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'abcdefghij'];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 1, 'xyz', 'abcdefghij' ];
+  var got = path.globFilter( src, '+([a-g])+([a-z])' );
+  test.identical( got, expected );
+
+  test.case = 'glob range group of chars and may have more trailing';
+  var expected = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 'abcdefghij'];
+  var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a', 1, 'xyz', 'abcdefghij' ];
+  var got = path.globFilter( src, '+([a-g])*([a-z])' );
+  test.identical( got, expected );
+
+  test.case = 'empty digit glob for group of unexpected chars';
   var expected = [ ];
   var src = [ 'abc', 'abcd', 'abcde', 'abcdef', 'abcdefg', 'a' ];
   var got = path.globFilter( src, '+([0-9])' );
   test.identical( got, expected );
 
-  test.case = 'glob for group of digits';
+  test.case = 'digit glob for group of digits';
   var expected = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890 ];
   var src = [ 1, 2, 3, 4, 5, 123, 456, 123456, 7890, 'a', 'abc' ];
   var got = path.globFilter( src, '+([0-9])' );
