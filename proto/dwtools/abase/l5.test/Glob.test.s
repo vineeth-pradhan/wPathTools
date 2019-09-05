@@ -317,55 +317,55 @@ function globFilter( test )
   var got = path.globFilter( src, '' );
   test.identical( got, expected );
 
-  test.case = 'empty right glob';
+  test.case = 'mandatory single char followed by * that should never be found';
   test.description = 'selector out of league';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'z*' );
   test.identical( got, expected );
 
-  test.case = 'empty right glob';
+  test.case = '* followed by mandatory char that should never be found';
+  var expected = [];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, '*a' );
+  test.identical( got, expected );
+
+  test.case = 'mandatory double char followed by * that should never be found';
   test.description = 'selector starts with double out of league chars';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'za*' );
   test.identical( got, expected );
 
-  test.case = 'empty right glob';
+  test.case = '* followed by mandatory double char that should never be found';
   test.description = 'selector ends with double out of league chars';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, '*az' );
   test.identical( got, expected );
 
-  test.case = 'empty right glob';
-  test.description = 'selector starts with unexpected char within the league';
-  var expected = [];
-  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
-  var got = path.globFilter( src, 'b*' );
-  test.identical( got, expected );
-
-  test.case = 'empty right glob';
+  test.case = 'plain mandatory string that should never be found';
   test.description = 'selector string length overflow';
   var expected = [];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'dbba' );
   test.identical( got, expected );
+ 
+  test.case = 'plain mandatory string that should be found';
+  test.description = 'selector string length overflow';
+  var expected = [ 'dbb' ];
+  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
+  var got = path.globFilter( src, 'dbb' );
+  test.identical( got, expected );
 
-  test.case = 'right glob';
+  test.case = 'mandatory char followed by * that should be found';
   test.description = 'selector string starts with d';
   var expected = [ 'dbb', 'dab' ];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, 'd*' );
   test.identical( got, expected );
 
-  test.case = 'empty left glob';
-  var expected = [];
-  var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
-  var got = path.globFilter( src, '*a' );
-  test.identical( got, expected );
-
-  test.case = 'left glob';
+  test.case = '* followed by mandatory char that should be found';
   var expected = [ 'adb', 'dbb', 'dab' ];
   var src = [ 'abc', 'abd', 'adb', 'dbb', 'dab' ];
   var got = path.globFilter( src, '*b' );
@@ -555,6 +555,7 @@ function globFilter( test )
   test.case = 'plain numbers as glob must fail';
   var src = [ 0, 1, 2, 3, 4 ];
   test.shouldThrowErrorSync( path.globFilter( src, 0 ) );
+
 }
 
 //
